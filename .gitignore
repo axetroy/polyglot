@@ -1,0 +1,49 @@
+# Dependencies
+node_modules/
+
+# Build output
+dist/
+build/
+*.tsbuildinfo
+
+# Source maps (never committed — dist/ is already ignored)
+*.map
+
+# Root-level compiler output (should not exist: root tsconfig sets noEmit)
+/vitest.config.js
+/vitest.config.d.ts
+
+# Test / tooling caches
+coverage/
+.cache/
+*.cache
+.eslintcache
+cache
+
+# Logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Environment
+.env
+.env.local
+.env.*.local
+*.local
+
+# Editor / OS
+.vscode/
+.idea/
+*.swp
+*.swo
+.DS_Store
+Thumbs.db
+
+# Temp
+tmp/
+temp/
+*.tmp
+
+# DSH local state
+.DSH_
