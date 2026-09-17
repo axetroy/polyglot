@@ -1,6 +1,8 @@
 name: Release
 
 on:
+  # Run on push to main: if there are unprocessed changesets, create a version-bump PR.
+  # When that PR is merged, this workflow runs again and publishes to npm.
   push:
     branches: [main, master]
 
@@ -9,18 +11,51 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  release:
+  # Job 1: detect changesets and create a version-bump PR (if needed).
+  # Skipped when the trigger is a version-bump commit (already processed).
+  version:
+    name: Create version bump PR
+    runs-on: ubuntu-latest
+    if: >-
+      !contains(github.event.head_commit.message, 'chore: version bump')
+    permissions:
+      contents: write
+      pull-requests: write
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+
+      - uses: actions/setup-node@v7
+        with:
+          node-version: "20"
+          cache: "npm"
+
+      - run: npm ci --ignore-scripts
+
+      - uses: changesets/action@v1
+        with:
+          title: "chore: version bump"
+          commit: "chore: version bump"
+          version: npm run version
+          # Do NOT publish here — the publish job below handles that.
+          publish: ""
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+  # Job 2: publish to npm when a version-bump commit lands on main.
+  # Skipped when no version bump was detected (normal feature PR merges).
+  publish:
     name: Publish to npm
     runs-on: ubuntu-latest
-    # Only publish when a version-bump commit lands on main.
-    # The changeset tool creates this commit automatically after its PR is merged.
+    needs: [version]
+    # Only run when the workflow was triggered by a version-bump commit.
     if: >-
-      github.event_name == 'push' &&
-      (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/master') &&
       contains(github.event.head_commit.message, 'chore: version bump')
     permissions:
       contents: write # git tag
-      id-token: write # npm provenance (OIDC, no secret needed)
+      id-token: write # npm provenance (OIDC, no extra secret needed)
     steps:
       - uses: actions/checkout@v7
         with:
@@ -36,12 +71,12 @@ jobs:
       - run: npm run build
 
       # Publish public packages with provenance.
-      # --provenance: npm auto-generates a sigstore attestation linked to
-      #               this GitHub Actions run — no extra env vars needed.
-      # NPM_TOKEN: set once by repo owner; stored as a GitHub secret.
+      # --provenance: auto-generates sigstore attestation from GitHub Actions
+      #               OIDC context — no extra env vars required.
+      # NPM_TOKEN: set once by repo owner via `npm login`; stored as GitHub secret.
       - run: |
-          npm publish -w @polyglot/sdk  --provenance --access public
-          npm publish -w @polyglot/cli  --provenance --access public
+          npm publish -w @polyglot/sdk     --provenance --access public
+          npm publish -w @polyglot/cli     --provenance --access public
           npm publish -w @polyglot/browser --provenance --access public
         env:
           NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
