@@ -159,7 +159,7 @@ function assertExtracted(root: string): void {
 
 /** Look up an entry by name first; if missing, scan by content as a fallback. */
 function findByNameOrContent(root: string, name: string, content: Buffer): string[] {
-  const byName = [];
+  const byName: string[] = [];
   const walk = (base: string): void => {
     for (const item of readdirSync(base, { withFileTypes: true })) {
       const full = join(base, item.name);
@@ -170,7 +170,7 @@ function findByNameOrContent(root: string, name: string, content: Buffer): strin
   walk(root);
   if (byName.length > 0) return byName;
   // Fallback: scan by content (handles encoding-mangled filenames)
-  const byContent = [];
+  const byContent: string[] = [];
   const scan = (base: string): void => {
     for (const item of readdirSync(base, { withFileTypes: true })) {
       const full = join(base, item.name);
