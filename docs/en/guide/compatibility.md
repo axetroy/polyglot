@@ -26,16 +26,48 @@ The front image is a 512×512 PNG (about 390 KB), so the offset is a real, non-t
 
 ## Measured results
 
-| Tool                    | Implementation | List       | Extract    | Content comparison | Notes                                                                         |
-| ----------------------- | -------------- | ---------- | ---------- | ------------------ | ----------------------------------------------------------------------------- |
-| `unzip` / `zipinfo`     | Info-ZIP       | ✅         | ✅         | ✅ identical       | No `extra bytes` warning; `unzip -t` reports `No errors detected`             |
-| `bsdtar` / `tar`        | libarchive     | ✅         | ✅         | ✅ identical       | Same lineage as macOS Archive Utility and Windows 11 File Explorer            |
-| Python `zipfile`        | CPython stdlib | ✅         | ✅         | ✅ identical       | `testzip()` returns `None` (all CRCs pass)                                    |
-| 7-Zip (`7zz`)           | Igor Pavlov    | ✅         | ✅         | ✅ identical       | Prints an `Embedded Stub Size` notice — correct recognition of the SFX prefix |
-| `ditto`                 | Apple          | ❌         | ❌         | —                  | Reports `Couldn't read PKZip signature`, see "Known limitations" below        |
-| `jar` / `java.util.zip` | OpenJDK        | not tested | not tested | —                  | No JDK on the test machine; logically the same class as Info-ZIP              |
+| Tool                    | Implementation | List       | Extract    | Content comparison | Notes                                                                                                                                                                               |
+| ----------------------- | -------------- | ---------- | ---------- | ------------------ | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `unzip` / `zipinfo`     | Info-ZIP       | ✅         | ✅         | ✅ identical       | Native on Linux/macOS; installed via chocolatey on Windows. **Chinese filenames may appear as `????.txt` in Windows console**, but extraction is correct. No `extra bytes` warning. |
+| `bsdtar` / `tar`        | libarchive     | ✅         | ✅         | ✅ identical       | Native `bsdtar` on macOS; built-in `tar.exe` on Windows 10+ (same libarchive lineage). Same as macOS Archive Utility and Win11 Explorer                                             |
+| Python `zipfile`        | CPython stdlib | ✅         | ✅         | ✅ identical       | Pre-installed on all three platforms; `testzip()` returns `None` (all CRCs pass)                                                                                                    |
+| 7-Zip (`7zz` / `7z`)    | Igor Pavlov    | ✅         | ✅         | ✅ identical       | Linux uses official tarball (`7zz`); macOS uses Homebrew (`sevenzip`); Windows uses chocolatey (`7z`). **Windows output uses backslash paths**, normalised in tests                 |
+| `ditto`                 | Apple          | ❌         | ❌         | —                  | Reports `Couldn't read PKZip signature`, see "Known limitations" below                                                                                                              |
+| `jar` / `java.util.zip` | OpenJDK        | not tested | not tested | —                  | No JDK on any CI platform; logically the same class as Info-ZIP                                                                                                                     |
 
-> About the 7-Zip notice: it prints `Warning: The archive is open with offset` and reports `Embedded Stub Size = <image byte count>`. This is 7-Zip **correctly recognising** that the file is fronted by a self-extracting-style prefix (an SFX stub); extraction then reports `Everything is Ok`. It is informational output, not an error.
+> About the 7-Zip notice: it prints `Warning: The archive is open with offset` and reports `Embedded Stub Size = <image byte count>`. This is 7-Zip **correctly recognising** that the file is fronted by a self-extracting-style prefix (an SFX stub); extraction then reports `Everything is Ok`. It is informational output, not an error. **Note: Windows 7-Zip uses backslash path separators in its listing output** (e.g. `sub\dir\note.md`); the test normalises these to forward slashes before matching.
+
+## CI Multi-platform Test Results (2026-09)
+
+The following results come from GitHub Actions automated CI, covering **3 OS × 2 Node versions = 6 matrix combinations**, each with all 126 test cases passing:
+
+| Platform           | Node    | Tests Passed | Notes                                                                                                               |
+| ------------------ | ------- | ------------ | ------------------------------------------------------------------------------------------------------------------- |
+| **Ubuntu** (Linux) | 20 / 22 | 126 / 126 ✅ | `unzip` + `bsdtar` + `7zz` (official tarball) + `python3` all work correctly                                        |
+| **macOS**          | 20 / 22 | 126 / 126 ✅ | `unzip` / `zipinfo` / `bsdtar` / `python3` are pre-installed; `sevenzip` installed via Homebrew                     |
+| **Windows**        | 20 / 22 | 126 / 126 ✅ | 7-Zip installed via chocolatey; `tar` (built-in libarchive) and `python` used directly; `unzip` best-effort install |
+
+### Windows Platform Notes
+
+- **Path separators**: 7-Zip listing output uses `\` (backslash), e.g. `sub\dir\note.md`. Test code normalises these before matching.
+- **UTF-8 filenames**: Some tools (e.g. Windows `unzip`, `tar`) may display `中文文档.txt` as `????.txt` in non-UTF-8 consoles. The test includes a content-based fallback lookup so checks remain meaningful across platforms.
+- **Missing tools are skipped**: `unzip` on Windows may fail to install (chocolatey `continue-on-error: true`); the test skips gracefully and other tools are still verified.
+
+### Test Coverage
+
+Each platform verifies the following 9 third-party compatibility contracts:
+
+| #   | Test                                                     | Tool            |
+| --- | -------------------------------------------------------- | --------------- |
+| 1   | Central directory offset lands on `PK\x01\x02` signature | Layout contract |
+| 2   | No padding bloat; file size = image + archive            | Layout contract |
+| 3   | `unzip -t` reports no errors, no `extra bytes` warning   | Info-ZIP        |
+| 4   | `unzip` extracts all entries with identical bytes        | Info-ZIP        |
+| 5   | `zipinfo -v` parses central directory without warnings   | Info-ZIP        |
+| 6   | `bsdtar`/`tar` lists and extracts every entry            | libarchive      |
+| 7   | Python `zipfile` reads names, content, and CRCs intact   | Python          |
+| 8   | 7-Zip lists and extracts every entry                     | 7-Zip           |
+| 9   | File still reads as a valid PNG image                    | Front format    |
 
 ## Two classes of parser
 

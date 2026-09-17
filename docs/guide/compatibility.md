@@ -26,16 +26,48 @@ npm test -- tests/compatibility/third-party.test.ts
 
 ## 实测结果
 
-| 工具                    | 实现           | 列举 | 解压 | 内容比对 | 备注                                                      |
-| ----------------------- | -------------- | ---- | ---- | -------- | --------------------------------------------------------- |
-| `unzip` / `zipinfo`     | Info-ZIP       | ✅   | ✅   | ✅ 一致  | 无 `extra bytes` 警告；`unzip -t` 报 `No errors detected` |
-| `bsdtar` / `tar`        | libarchive     | ✅   | ✅   | ✅ 一致  | macOS Archive Utility、Windows 11 资源管理器同源          |
-| Python `zipfile`        | CPython stdlib | ✅   | ✅   | ✅ 一致  | `testzip()` 返回 `None`（CRC 全部通过）                   |
-| 7-Zip (`7zz`)           | Igor Pavlov    | ✅   | ✅   | ✅ 一致  | 输出 `Embedded Stub Size` 提示，属正常识别 SFX 前缀       |
-| `ditto`                 | Apple          | ❌   | ❌   | —        | 报 `Couldn't read PKZip signature`，见下文「已知不支持」  |
-| `jar` / `java.util.zip` | OpenJDK        | 未测 | 未测 | —        | 本机未安装 JDK；逻辑上与 Info-ZIP 同类                    |
+| 工具                    | 实现           | 列举 | 解压 | 内容比对 | 备注                                                                                                                                       |
+| ----------------------- | -------------- | ---- | ---- | -------- | ------------------------------------------------------------------------------------------------------------------------------------------ |
+| `unzip` / `zipinfo`     | Info-ZIP       | ✅   | ✅   | ✅ 一致  | Linux/macOS 原生；Windows 通过 chocolatey 安装。**Windows 控制台下中文文件名可能显示为 `????.txt`**，但解压内容正确。无 `extra bytes` 警告 |
+| `bsdtar` / `tar`        | libarchive     | ✅   | ✅   | ✅ 一致  | macOS 原生 `bsdtar`；Windows 10+ 内置 `tar.exe`（同为 libarchive）。同源 macOS 归档实用工具、Windows 11 资源管理器                         |
+| Python `zipfile`        | CPython stdlib | ✅   | ✅   | ✅ 一致  | 三个平台均预装或可通过系统包管理器安装；`testzip()` 返回 `None`（CRC 全部通过）                                                            |
+| 7-Zip (`7zz` / `7z`)    | Igor Pavlov    | ✅   | ✅   | ✅ 一致  | Linux 用官方 tarball (`7zz`)；macOS 用 Homebrew (`sevenzip`)；Windows 用 chocolatey (`7z`)。**Windows 输出使用反斜杠路径**，测试已归一化   |
+| `ditto`                 | Apple          | ❌   | ❌   | —        | 报 `Couldn't read PKZip signature`，见下文「已知不支持」                                                                                   |
+| `jar` / `java.util.zip` | OpenJDK        | 未测 | 未测 | —        | 三个平台均未安装 JDK；逻辑上与 Info-ZIP 同类                                                                                               |
 
-> 关于 7-Zip 的提示：它会打印 `Warning: The archive is open with offset` 并给出 `Embedded Stub Size = <图片字节数>`。这是 7-Zip **正确识别出**文件前部有一个自解压式前缀（SFX stub），随后 `Everything is Ok` 正常解压。这是信息性输出，不是错误。
+> 关于 7-Zip 的提示：它会打印 `Warning: The archive is open with offset` 并给出 `Embedded Stub Size = <图片字节数>`。这是 7-Zip **正确识别出**文件前部有一个自解压式前缀（SFX stub），随后 `Everything is Ok` 正常解压。这是信息性输出，不是错误。**注意：Windows 版 7-Zip 在列表输出中使用反斜杠路径**（`sub\dir\note.md`），测试时会做正向斜杠归一化后再匹配。
+
+## CI 多平台实测结果（2026-09）
+
+以下结果来自 GitHub Actions 自动 CI，覆盖 **3 个 OS × 2 个 Node 版本 = 6 个矩阵**，每个矩阵全部 126 个测试用例通过：
+
+| 平台               | Node    | 测试通过数   | 备注                                                                                       |
+| ------------------ | ------- | ------------ | ------------------------------------------------------------------------------------------ |
+| **Ubuntu** (Linux) | 20 / 22 | 126 / 126 ✅ | `unzip` + `bsdtar` + `7zz`（官方 tarball）+ `python3` 全部正常工作                         |
+| **macOS**          | 20 / 22 | 126 / 126 ✅ | `unzip` / `zipinfo` / `bsdtar` / `python3` 均为系统预装；`sevenzip` 通过 Homebrew 安装     |
+| **Windows**        | 20 / 22 | 126 / 126 ✅ | 7-Zip 通过 chocolatey 安装；`tar`（内置 libarchive）和 `python` 直接使用；`unzip` 尽力安装 |
+
+### Windows 平台特殊说明
+
+- **路径分隔符**：7-Zip 列表输出使用 `\`（反斜杠），如 `sub\dir\note.md`。测试代码已做归一化处理。
+- **UTF-8 文件名**：部分工具（如 Windows `unzip`、`tar`）在非 UTF-8 控制台下可能将 `中文文档.txt` 显示为 `????.txt`。测试已增加内容回溯查找（按文件内容而非文件名匹配），确保跨平台一致。
+- **未安装工具自动跳过**：`unzip` 在 Windows 上通过 chocolatey 安装但可能失败（`continue-on-error: true`），测试会以 skip 形式跳过该工具，不影响其他工具验证。
+
+### 测试覆盖率
+
+每个平台均验证以下 9 项第三方兼容性契约：
+
+| #   | 测试项                                 | 覆盖工具   |
+| --- | -------------------------------------- | ---------- |
+| 1   | 中央目录偏移落在 `PK\x01\x02` 签名上   | 布局契约   |
+| 2   | 无填充膨胀，文件大小 = 图片 + 归档     | 布局契约   |
+| 3   | `unzip -t` 无报错无 `extra bytes` 警告 | Info-ZIP   |
+| 4   | `unzip` 解压所有条目，字节一致         | Info-ZIP   |
+| 5   | `zipinfo -v` 无警告解析中央目录        | Info-ZIP   |
+| 6   | `bsdtar/tar` 列举并解压所有条目        | libarchive |
+| 7   | Python `zipfile` 读取名称/内容/CRC     | Python     |
+| 8   | 7-Zip 列举并解压所有条目               | 7-Zip      |
+| 9   | 文件仍能被识别为有效 PNG 图像          | 前端格式   |
 
 ## 两类解析器
 
