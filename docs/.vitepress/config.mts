@@ -24,15 +24,19 @@ export default defineConfig({
   head: [
     ["meta", { name: "theme-color", content: "#6c5ce7" }],
     ["meta", { property: "og:type", content: "website" }],
+    [
+      "script",
+      {},
+      `(()=>{var l=location.href,n=navigator.language;if(!/^https?:\\/\\/[^/]+\\/polyglot\\/(en\\/?|$)/.test(n)&&!/^https?:\\/\\/[^/]+\\/polyglot\\/(en\\/?|[a-z]{2}-[A-Z]{2}\\/?)/i.test(n)){var u=new URL(n),p=u.pathname.replace(/\\/polyglot\\/?$/,'')||'/';u.pathname='/polyglot/en'+(p==='/p'?'':p);if(u.href!==n){n=u.href;try{history.replaceState(null,'',n)}catch(e){}location.replace(n)}}})()`,
+    ],
   ],
 
-  themeConfig: {
-    socialLinks: [{ icon: "github", link: "https://github.com/axetroy/polyglot" }],
-
-    locales: {
-      root: {
-        label: "简体中文",
-        lang: "zh-CN",
+  locales: {
+    root: {
+      label: "简体中文",
+      lang: "zh-CN",
+      themeConfig: {
+        socialLinks: [{ icon: "github", link: "https://github.com/axetroy/polyglot" }],
         nav: [
           { text: "指南", link: "/guide/getting-started", activeMatch: "/guide/" },
           { text: "Playground", link: "/playground" },
@@ -62,11 +66,14 @@ export default defineConfig({
           text: "在 GitHub 上编辑此页",
         },
       },
+    },
 
-      en: {
-        label: "English",
-        lang: "en-US",
-        link: "/en/",
+    en: {
+      label: "English",
+      lang: "en-US",
+      link: "/en/",
+      themeConfig: {
+        socialLinks: [{ icon: "github", link: "https://github.com/axetroy/polyglot" }],
         nav: [
           { text: "Guide", link: "/en/guide/getting-started", activeMatch: "/en/guide/" },
           { text: "Playground", link: "/en/playground" },
