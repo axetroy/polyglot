@@ -100,6 +100,9 @@ polyglot extract output.png -d ./out
 
 无需安装即可在浏览器中试用 —— 所有处理都在本地完成，文件不会上传到任何服务器：
 
+- **合成**：上传图片 + 添加条目 → 生成 polyglot 文件 → 单文件下载
+- **解析**：上传 polyglot 文件 → 预览图片 + 列出归档条目 → 逐文件下载或**打包为标准 ZIP 下载**
+
 [打开 Playground →](/playground)
 
 ## 下一步

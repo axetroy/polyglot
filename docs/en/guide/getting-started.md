@@ -99,6 +99,9 @@ polyglot extract output.png -d ./out
 
 No installation required — try everything in your browser. All processing happens locally; no files are uploaded to any server.
 
+- **Create**: upload an image + add entries → generate a polyglot file → single-file download
+- **Inspect**: upload a polyglot file → preview the image + list archive entries → download individual files or **package as a standard ZIP**
+
 [Open Playground →](/en/playground)
 
 ## Next steps

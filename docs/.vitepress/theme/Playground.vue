@@ -5,6 +5,7 @@ import {
   inspect,
   extract,
   detectFrontFormat,
+  buildZip,
   type PolyglotInspection,
   type ZipEntryInput,
 } from "@polyglot/browser";
@@ -31,12 +32,21 @@ interface CreateResult {
   height: number;
 }
 
+interface InspectEntry {
+  name: string;
+  size: number;
+  /** Text preview for display; null when the entry is binary. */
+  preview: string | null;
+  /** Original bytes — used to rebuild a correct ZIP on download. */
+  rawData: Uint8Array;
+}
+
 interface InspectResult {
   info: PolyglotInspection;
   fileName: string;
   fileSize: number;
   frontPreview: string | null;
-  extracted: Array<{ name: string; size: number; preview: string | null }>;
+  extracted: InspectEntry[];
 }
 
 const mode = ref<Mode>("create");
@@ -213,6 +223,7 @@ async function onInspectSelected(files: FileList | null) {
           name: entry.name,
           size: entry.data.length,
           preview: isText ? new TextDecoder().decode(entry.data) : null,
+          rawData: entry.data,
         };
       });
     }
@@ -234,11 +245,24 @@ async function onInspectSelected(files: FileList | null) {
 function downloadEntry(name: string, index: number) {
   const entry = inspectResult.value?.extracted[index];
   if (!entry) return;
-  const blob = new Blob([entry.preview ?? ""], { type: "application/octet-stream" });
+  const blob = new Blob([entry.rawData], { type: "application/octet-stream" });
   const url = URL.createObjectURL(blob);
   const link = document.createElement("a");
   link.href = url;
   link.download = name;
+  link.click();
+  URL.revokeObjectURL(url);
+}
+
+function downloadZip() {
+  const entries = inspectResult.value?.extracted;
+  if (!entries || entries.length === 0) return;
+  const zipBytes = buildZip(entries.map((e) => ({ name: e.name, data: e.rawData })));
+  const blob = new Blob([zipBytes], { type: "application/zip" });
+  const url = URL.createObjectURL(blob);
+  const link = document.createElement("a");
+  link.href = url;
+  link.download = inspectResult.value!.fileName.replace(/\.(png|jpg|jpeg)$/i, "") + ".zip";
   link.click();
   URL.revokeObjectURL(url);
 }
@@ -458,8 +482,17 @@ onMounted(() => {
                 <li v-for="(entry, index) in inspectResult.extracted" :key="entry.name">
                   <span class="pg-entry-name">{{ entry.name }}</span>
                   <span class="pg-size">{{ formatBytes(entry.size) }}</span>
+                  <button class="pg-btn-sm" @click="downloadEntry(entry.name, index)">下载</button>
                 </li>
               </ul>
+              <div class="pg-zip-actions">
+                <button class="pg-btn pg-btn-primary" @click="downloadZip">
+                  下载为 ZIP &nbsp;⬇
+                </button>
+                <span class="pg-hint"
+                  >将归档内容打包为标准 ZIP 文件下载（浏览器本地构建，不上传）</span
+                >
+              </div>
             </template>
             <p v-else class="pg-hint">图像之后没有归档数据。</p>
           </div>
@@ -739,6 +772,31 @@ onMounted(() => {
 
 .pg-download {
   margin-top: 14px;
+}
+
+.pg-btn-sm {
+  padding: 2px 8px;
+  font-size: 12px;
+  border: 1px solid var(--vp-c-divider);
+  border-radius: 4px;
+  background: var(--vp-c-bg-mute);
+  cursor: pointer;
+  color: var(--vp-c-text-2);
+  transition: all 0.15s;
+}
+
+.pg-btn-sm:hover {
+  border-color: var(--vp-c-brand-1);
+  color: var(--vp-c-brand-1);
+}
+
+.pg-zip-actions {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-top: 12px;
+  padding-top: 12px;
+  border-top: 1px solid var(--vp-c-divider);
 }
 
 .pg-metrics {
