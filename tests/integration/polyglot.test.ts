@@ -1,23 +1,23 @@
-import { describe, it, expect, beforeAll, afterAll } from 'vitest';
-import { PolyglotEngine } from '@polyglot/core';
-import { pngAdapter } from '@polyglot/formats-png';
-import { jpegAdapter } from '@polyglot/formats-jpeg';
-import { zipAdapter } from '@polyglot/formats-zip';
-import { writeFileSync, mkdirSync, rmSync } from 'fs';
-import { join } from 'path';
+import { describe, it, expect, beforeAll, afterAll } from "vitest";
+import { PolyglotEngine } from "@polyglot/core";
+import { pngAdapter } from "@polyglot/formats-png";
+import { jpegAdapter } from "@polyglot/formats-jpeg";
+import { zipAdapter } from "@polyglot/formats-zip";
+import { writeFileSync, mkdirSync, rmSync } from "fs";
+import { join } from "path";
 
-const TEST_DIR = join(import.meta.dirname, 'tmp');
+const TEST_DIR = join(import.meta.dirname, "tmp");
 
 function createMinimapPNG(): string {
   mkdirSync(TEST_DIR, { recursive: true });
   const png = createMinimalPNG();
-  const path = join(TEST_DIR, 'test.png');
+  const path = join(TEST_DIR, "test.png");
   writeFileSync(path, png);
   return path;
 }
 
 function createMinimalPNG(): Buffer {
-  const sig = Buffer.from([0x89, 0x50, 0x4E, 0x47, 0x0D, 0x0A, 0x1A, 0x0A]);
+  const sig = Buffer.from([0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a]);
   const ihdrData = Buffer.alloc(13);
   ihdrData.writeUInt32BE(1, 0);
   ihdrData.writeUInt32BE(1, 4);
@@ -26,14 +26,14 @@ function createMinimalPNG(): Buffer {
   ihdrData.writeUInt8(0, 10);
   ihdrData.writeUInt8(0, 11);
   ihdrData.writeUInt8(0, 12);
-  const ihdr = createChunk('IHDR', ihdrData);
-  const idat = createChunk('IDAT', Buffer.from([0, 255, 0, 0]));
-  const iend = createChunk('IEND', Buffer.alloc(0));
+  const ihdr = createChunk("IHDR", ihdrData);
+  const idat = createChunk("IDAT", Buffer.from([0, 255, 0, 0]));
+  const iend = createChunk("IEND", Buffer.alloc(0));
   return Buffer.concat([sig, ihdr, idat, iend]);
 }
 
 function createChunk(type: string, data: Buffer): Buffer {
-  const typeBuf = Buffer.from(type, 'ascii');
+  const typeBuf = Buffer.from(type, "ascii");
   const crc = computeCrc32(Buffer.concat([typeBuf, data]));
   const header = Buffer.alloc(8);
   header.writeUInt32BE(data.length, 0);
@@ -61,66 +61,69 @@ function computeCrc32(data: Buffer): number {
 
 function createMinimalJPEG(): Buffer {
   // Minimal valid JPEG: SOI + APP0 + SOF0 + DHT + SOS + scan data + EOI
-  const chunks: Buffer[] = [Buffer.from([0xFF, 0xD8])]; // SOI
+  const chunks: Buffer[] = [Buffer.from([0xff, 0xd8])]; // SOI
 
   // APP0 (JFIF) - 18 bytes total (2 marker + 2 length + 16 data)
-  chunks.push(Buffer.from([
-    0xFF, 0xE0, 0x00, 0x10,
-    0x4A, 0x46, 0x49, 0x46, 0x00, 0x01,
-    0x01, 0x00, 0x00, 0x01, 0x00, 0x01, 0x00, 0x00,
-  ]));
+  chunks.push(
+    Buffer.from([
+      0xff, 0xe0, 0x00, 0x10, 0x4a, 0x46, 0x49, 0x46, 0x00, 0x01, 0x01, 0x00, 0x00, 0x01, 0x00,
+      0x01, 0x00, 0x00,
+    ])
+  );
 
   // SOF0 (Start of Frame) - 13 bytes total
-  chunks.push(Buffer.from([
-    0xFF, 0xC0, 0x00, 0x0B, 0x08,
-    0x00, 0x01, 0x00, 0x01, 0x01, 0x01, 0x11, 0x00,
-  ]));
+  chunks.push(
+    Buffer.from([0xff, 0xc0, 0x00, 0x0b, 0x08, 0x00, 0x01, 0x00, 0x01, 0x01, 0x01, 0x11, 0x00])
+  );
 
   // DHT (Huffman Table) - 35 bytes total (marker + length + 31 data)
-  chunks.push(Buffer.from([
-    0xFF, 0xC4, 0x00, 0x1F, 0x00,
-    0x00, 0x01, 0x05, 0x01, 0x01, 0x01, 0x01, 0x01, 0x01, 0x00,
-    0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
-    0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08, 0x09, 0x0A, 0x0B, 0x00, 0x00,
-  ]));
+  chunks.push(
+    Buffer.from([
+      0xff, 0xc4, 0x00, 0x1f, 0x00, 0x00, 0x01, 0x05, 0x01, 0x01, 0x01, 0x01, 0x01, 0x01, 0x00,
+      0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08,
+      0x09, 0x0a, 0x0b, 0x00, 0x00,
+    ])
+  );
 
   // SOS (Start of Scan) - 10 bytes total
-  chunks.push(Buffer.from([
-    0xFF, 0xDA, 0x00, 0x08, 0x01, 0x01, 0x00, 0x00, 0x3F, 0x00,
-  ]));
+  chunks.push(Buffer.from([0xff, 0xda, 0x00, 0x08, 0x01, 0x01, 0x00, 0x00, 0x3f, 0x00]));
 
   // Minimal compressed scan data
   chunks.push(Buffer.from([0x00, 0x00]));
   // EOI
-  chunks.push(Buffer.from([0xFF, 0xD9]));
+  chunks.push(Buffer.from([0xff, 0xd9]));
   return Buffer.concat(chunks);
 }
 
-describe('PNG + ZIP polyglot', () => {
+describe("PNG + ZIP polyglot", () => {
   let engine: PolyglotEngine;
 
   beforeAll(() => {
     engine = new PolyglotEngine();
     engine.registerFront(pngAdapter);
     engine.registerBack(zipAdapter);
-    engine.registerCompatibility('png', 'zip', true, 'relocated');
+    engine.registerCompatibility("png", "zip", true, "relocated");
   });
 
   afterAll(() => {
-    try { rmSync(TEST_DIR, { recursive: true, force: true }); } catch { /* ignore */ }
+    try {
+      rmSync(TEST_DIR, { recursive: true, force: true });
+    } catch {
+      /* ignore */
+    }
   });
 
-  it('should create a PNG+ZIP polyglot file', async () => {
+  it("should create a PNG+ZIP polyglot file", async () => {
     const pngPath = createMinimapPNG();
     const file = await engine.create({
       front: pngPath,
       back: {
-        format: 'zip',
-        entries: [{ name: 'hello.txt', data: Buffer.from('Hello World') }],
+        format: "zip",
+        entries: [{ name: "hello.txt", data: Buffer.from("Hello World") }],
       },
     });
 
-    const outputPath = join(TEST_DIR, 'output.png');
+    const outputPath = join(TEST_DIR, "output.png");
     await file.write(outputPath);
 
     const buffer = file.getBuffer();
@@ -128,115 +131,121 @@ describe('PNG + ZIP polyglot', () => {
 
     // Regression: the ZIP must be appended once, immediately after the image.
     // A padded relocation would inflate the file by a whole image length.
-    const { statSync } = await import('fs');
+    const { statSync } = await import("fs");
     const pngSize = statSync(pngPath).size;
-    const standaloneZip = await zipAdapter.create([{ name: 'hello.txt', data: Buffer.from('Hello World') }]);
+    const standaloneZip = await zipAdapter.create([
+      { name: "hello.txt", data: Buffer.from("Hello World") },
+    ]);
     expect(buffer.length).toBe(pngSize + standaloneZip.length);
 
     const info = await engine.inspect(outputPath);
     expect(info.polyglot).toBe(true);
-    expect(info.front?.format).toBe('png');
-    expect(info.back?.format).toBe('zip');
+    expect(info.front?.format).toBe("png");
+    expect(info.back?.format).toBe("zip");
   });
 
-  it('should detect polyglot file', async () => {
+  it("should detect polyglot file", async () => {
     const pngPath = createMinimapPNG();
     const file = await engine.create({
       front: pngPath,
       back: {
-        format: 'zip',
-        entries: [{ name: 'test.txt', data: Buffer.from('test') }],
+        format: "zip",
+        entries: [{ name: "test.txt", data: Buffer.from("test") }],
       },
     });
 
-    const outputPath = join(TEST_DIR, 'detect.png');
+    const outputPath = join(TEST_DIR, "detect.png");
     await file.write(outputPath);
 
     const detection = await engine.detect(outputPath);
     expect(detection.isPolyglot).toBe(true);
-    expect(detection.front?.format).toBe('png');
-    expect(detection.back?.format).toBe('zip');
+    expect(detection.front?.format).toBe("png");
+    expect(detection.back?.format).toBe("zip");
   });
 
-  it('should open front (PNG)', async () => {
+  it("should open front (PNG)", async () => {
     const pngPath = createMinimapPNG();
     const file = await engine.create({
       front: pngPath,
       back: {
-        format: 'zip',
-        entries: [{ name: 'test.txt', data: Buffer.from('test') }],
+        format: "zip",
+        entries: [{ name: "test.txt", data: Buffer.from("test") }],
       },
     });
 
-    const outputPath = join(TEST_DIR, 'front.png');
+    const outputPath = join(TEST_DIR, "front.png");
     await file.write(outputPath);
 
     const front = await engine.openFront(outputPath);
-    expect(front.format).toBe('png');
+    expect(front.format).toBe("png");
     expect(front.size).toBeGreaterThan(0);
   });
 
-  it('should open back (ZIP) and list entries', async () => {
+  it("should open back (ZIP) and list entries", async () => {
     const pngPath = createMinimapPNG();
     const file = await engine.create({
       front: pngPath,
       back: {
-        format: 'zip',
+        format: "zip",
         entries: [
-          { name: 'hello.txt', data: Buffer.from('Hello') },
-          { name: 'world.txt', data: Buffer.from('World') },
+          { name: "hello.txt", data: Buffer.from("Hello") },
+          { name: "world.txt", data: Buffer.from("World") },
         ],
       },
     });
 
-    const outputPath = join(TEST_DIR, 'back.png');
+    const outputPath = join(TEST_DIR, "back.png");
     await file.write(outputPath);
 
     const archive = await engine.openBack(outputPath);
-    expect(archive.format).toBe('zip');
+    expect(archive.format).toBe("zip");
 
     const entries = await archive.list();
-    expect(entries).toContain('hello.txt');
-    expect(entries).toContain('world.txt');
+    expect(entries).toContain("hello.txt");
+    expect(entries).toContain("world.txt");
 
-    const hello = await archive.read('hello.txt');
-    expect(new TextDecoder().decode(hello)).toBe('Hello');
+    const hello = await archive.read("hello.txt");
+    expect(new TextDecoder().decode(hello)).toBe("Hello");
   });
 });
 
-describe('JPEG + ZIP polyglot', () => {
+describe("JPEG + ZIP polyglot", () => {
   let engine: PolyglotEngine;
 
   beforeAll(() => {
     engine = new PolyglotEngine();
     engine.registerFront(jpegAdapter);
     engine.registerBack(zipAdapter);
-    engine.registerCompatibility('jpeg', 'zip', true, 'relocated');
+    engine.registerCompatibility("jpeg", "zip", true, "relocated");
   });
 
   afterAll(() => {
-    try { rmSync(TEST_DIR, { recursive: true, force: true }); } catch { /* ignore */ }
+    try {
+      rmSync(TEST_DIR, { recursive: true, force: true });
+    } catch {
+      /* ignore */
+    }
   });
 
-  it('should create a JPEG+ZIP polyglot file', async () => {
-    const jpegPath = join(TEST_DIR, 'test.jpg');
+  it("should create a JPEG+ZIP polyglot file", async () => {
+    const jpegPath = join(TEST_DIR, "test.jpg");
     mkdirSync(TEST_DIR, { recursive: true });
     writeFileSync(jpegPath, createMinimalJPEG());
 
     const file = await engine.create({
       front: jpegPath,
       back: {
-        format: 'zip',
-        entries: [{ name: 'data.bin', data: Buffer.from([1, 2, 3]) }],
+        format: "zip",
+        entries: [{ name: "data.bin", data: Buffer.from([1, 2, 3]) }],
       },
     });
 
-    const outputPath = join(TEST_DIR, 'output.jpg');
+    const outputPath = join(TEST_DIR, "output.jpg");
     await file.write(outputPath);
 
     const info = await engine.inspect(outputPath);
     expect(info.polyglot).toBe(true);
-    expect(info.front?.format).toBe('jpeg');
-    expect(info.back?.format).toBe('zip');
+    expect(info.front?.format).toBe("jpeg");
+    expect(info.back?.format).toBe("zip");
   });
 });

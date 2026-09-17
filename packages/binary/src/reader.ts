@@ -1,9 +1,21 @@
-import type { BinarySource } from './source.js';
+import type { BinarySource } from "./source.js";
 import {
-  readU8, readU16LE, readU16BE, readU32LE, readU32BE,
-  writeU8, writeU16LE, writeU16BE, writeU32LE, writeU32BE,
-  alloc, allocFill, concat, fromString, toString,
-} from './bytes.js';
+  readU8,
+  readU16LE,
+  readU16BE,
+  readU32LE,
+  readU32BE,
+  writeU8,
+  writeU16LE,
+  writeU16BE,
+  writeU32LE,
+  writeU32BE,
+  alloc,
+  allocFill,
+  concat,
+  fromString,
+  toString,
+} from "./bytes.js";
 
 export class BinaryReader {
   private readonly source: BinarySource;

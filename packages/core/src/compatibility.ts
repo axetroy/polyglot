@@ -1,4 +1,4 @@
-import type { CompatibilityRule } from './types.js';
+import type { CompatibilityRule } from "./types.js";
 
 /**
  * Default security limits for archive parsing.
@@ -25,23 +25,23 @@ export const DEFAULT_SECURITY_LIMITS: ArchiveSecurityLimits = {
  */
 export function sanitizeEntryPath(name: string): string {
   if (!name || name.length === 0) {
-    throw new Error('Entry path is empty');
+    throw new Error("Entry path is empty");
   }
 
-  const normalized = name.replace(/\\/g, '/');
+  const normalized = name.replace(/\\/g, "/");
 
   // Reject absolute paths
-  if (normalized.startsWith('/')) {
+  if (normalized.startsWith("/")) {
     throw new Error(`Path traversal blocked: absolute path detected in entry "${name}"`);
   }
 
   // Reject parent directory traversal
-  const parts = normalized.split('/');
+  const parts = normalized.split("/");
   for (const part of parts) {
-    if (part === '..') {
+    if (part === "..") {
       throw new Error(`Path traversal blocked: ".." component detected in entry "${name}"`);
     }
-    if (part === '.' && parts.length === 1) {
+    if (part === "." && parts.length === 1) {
       throw new Error(`Path traversal blocked: entry path is "."`);
     }
   }
@@ -55,26 +55,22 @@ export function sanitizeEntryPath(name: string): string {
  */
 export function validateArchiveLimits(
   entries: { name: string; data: Buffer }[],
-  limits: ArchiveSecurityLimits,
+  limits: ArchiveSecurityLimits
 ): void {
   if (entries.length > limits.maxEntries) {
-    throw new Error(
-      `Too many entries: ${entries.length} exceeds limit of ${limits.maxEntries}`,
-    );
+    throw new Error(`Too many entries: ${entries.length} exceeds limit of ${limits.maxEntries}`);
   }
 
   let totalSize = 0;
   for (const entry of entries) {
     if (entry.data.length > limits.maxEntrySize) {
       throw new Error(
-        `Entry "${entry.name}" exceeds max size: ${entry.data.length} > ${limits.maxEntrySize}`,
+        `Entry "${entry.name}" exceeds max size: ${entry.data.length} > ${limits.maxEntrySize}`
       );
     }
     totalSize += entry.data.length;
     if (totalSize > limits.maxTotalSize) {
-      throw new Error(
-        `Total archive size exceeds limit: ${totalSize} > ${limits.maxTotalSize}`,
-      );
+      throw new Error(`Total archive size exceeds limit: ${totalSize} > ${limits.maxTotalSize}`);
     }
   }
 }
@@ -107,7 +103,7 @@ export class CompatibilityEngine {
    * Defaults to 'unsupported' if no rule exists.
    */
   getMode(front: string, back: string): string {
-    return this.rules.get(`${front}:${back}`)?.mode ?? 'unsupported';
+    return this.rules.get(`${front}:${back}`)?.mode ?? "unsupported";
   }
 
   getAllRules(): CompatibilityRule[] {

@@ -23,7 +23,7 @@ export function readU16LE(a: Uint8Array, i = 0): number {
 }
 
 export function writeU16LE(a: Uint8Array, i: number, v: number): void {
-  a[i]     = v & 0xff;
+  a[i] = v & 0xff;
   a[i + 1] = (v >>> 8) & 0xff;
 }
 
@@ -32,38 +32,28 @@ export function readU16BE(a: Uint8Array, i = 0): number {
 }
 
 export function writeU16BE(a: Uint8Array, i: number, v: number): void {
-  a[i]     = (v >>> 8) & 0xff;
+  a[i] = (v >>> 8) & 0xff;
   a[i + 1] = v & 0xff;
 }
 
 // ── 32-bit LE / BE ─────────────────────────────────────────
 export function readU32LE(a: Uint8Array, i = 0): number {
-  return (
-    a[i]! |
-    (a[i + 1]! << 8) |
-    (a[i + 2]! << 16) |
-    (a[i + 3]! << 24)
-  ) >>> 0;
+  return (a[i]! | (a[i + 1]! << 8) | (a[i + 2]! << 16) | (a[i + 3]! << 24)) >>> 0;
 }
 
 export function writeU32LE(a: Uint8Array, i: number, v: number): void {
-  a[i]     = v & 0xff;
+  a[i] = v & 0xff;
   a[i + 1] = (v >>> 8) & 0xff;
   a[i + 2] = (v >>> 16) & 0xff;
   a[i + 3] = (v >>> 24) & 0xff;
 }
 
 export function readU32BE(a: Uint8Array, i = 0): number {
-  return (
-    ((a[i]! << 24) |
-    (a[i + 1]! << 16) |
-    (a[i + 2]! << 8) |
-    a[i + 3]!) >>> 0
-  );
+  return ((a[i]! << 24) | (a[i + 1]! << 16) | (a[i + 2]! << 8) | a[i + 3]!) >>> 0;
 }
 
 export function writeU32BE(a: Uint8Array, i: number, v: number): void {
-  a[i]     = (v >>> 24) & 0xff;
+  a[i] = (v >>> 24) & 0xff;
   a[i + 1] = (v >>> 16) & 0xff;
   a[i + 2] = (v >>> 8) & 0xff;
   a[i + 3] = v & 0xff;

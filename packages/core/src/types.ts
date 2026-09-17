@@ -1,6 +1,6 @@
-import type { BinarySource, FrontAdapter, BackAdapter, ArchiveEntry } from '@polyglot/binary';
+import type { BinarySource, FrontAdapter, BackAdapter, ArchiveEntry } from "@polyglot/binary";
 
-export type FormatMode = 'native' | 'relocated' | 'experimental' | 'unsupported';
+export type FormatMode = "native" | "relocated" | "experimental" | "unsupported";
 
 export interface CompatibilityRule {
   front: string;

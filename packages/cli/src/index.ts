@@ -1,28 +1,29 @@
-import { Command } from 'commander';
-import { dirname, join } from 'path';
-import * as polyglot from '@polyglot/sdk';
+import { Command } from "commander";
+import { dirname, join } from "path";
+import * as polyglot from "@polyglot/sdk";
 
 const program = new Command();
 
 program
-  .name('polyglot')
-  .description('Polyglot File Engine - Create and inspect dual-format files')
-  .version('0.1.0');
+  .name("polyglot")
+  .description("Polyglot File Engine - Create and inspect dual-format files")
+  .version("0.1.0");
 
 program
-  .command('create')
-  .description('Create a polyglot file')
-  .requiredOption('--front <path>', 'Path to front format file (PNG/JPEG)')
-  .option('--back <format>', 'Back archive format', 'zip')
-  .option('--add <name:data>', 'Add entry to archive (can be repeated)', collectEntries, [])
-  .requiredOption('--output <path>', 'Output path for polyglot file')
+  .command("create")
+  .description("Create a polyglot file")
+  .requiredOption("--front <path>", "Path to front format file (PNG/JPEG)")
+  .option("--back <format>", "Back archive format", "zip")
+  .option("--add <name:data>", "Add entry to archive (can be repeated)", collectEntries, [])
+  .requiredOption("--output <path>", "Output path for polyglot file")
   .action(async (options) => {
     try {
       const file = await polyglot.polyglot.create({
         front: options.front,
         back: {
           format: options.back,
-          entries: options.add.length > 0 ? options.add : [{ name: 'empty.txt', data: Buffer.from('') }],
+          entries:
+            options.add.length > 0 ? options.add : [{ name: "empty.txt", data: Buffer.from("") }],
         },
       });
       await file.write(options.output);
@@ -34,14 +35,14 @@ program
   });
 
 program
-  .command('inspect')
-  .description('Inspect a polyglot file')
-  .argument('<path>', 'Path to file')
+  .command("inspect")
+  .description("Inspect a polyglot file")
+  .argument("<path>", "Path to file")
   .action(async (path) => {
     try {
       const info = await polyglot.polyglot.inspect(path);
       if (info.polyglot) {
-        console.log('Polyglot: true');
+        console.log("Polyglot: true");
         if (info.front) {
           console.log(`Front: ${info.front.format.toUpperCase()}`);
           console.log(`Front size: ${info.front.size} bytes`);
@@ -51,7 +52,7 @@ program
           console.log(`Back entries: ${info.back.entries}`);
         }
       } else {
-        console.log('Polyglot: false');
+        console.log("Polyglot: false");
       }
     } catch (err) {
       console.error(`Error: ${err instanceof Error ? err.message : String(err)}`);
@@ -60,9 +61,9 @@ program
   });
 
 program
-  .command('list')
-  .description('List archive entries in a polyglot file')
-  .argument('<path>', 'Path to polyglot file')
+  .command("list")
+  .description("List archive entries in a polyglot file")
+  .argument("<path>", "Path to polyglot file")
   .action(async (path) => {
     try {
       const archive = await polyglot.polyglot.openBack(path);
@@ -77,20 +78,24 @@ program
   });
 
 program
-  .command('extract')
-  .description('Extract archive entries from a polyglot file')
-  .argument('<path>', 'Path to polyglot file')
-  .argument('<output-dir>', 'Output directory')
+  .command("extract")
+  .description("Extract archive entries from a polyglot file")
+  .argument("<path>", "Path to polyglot file")
+  .argument("<output-dir>", "Output directory")
   .action(async (path, outputDir) => {
     try {
-      const fs = await import('fs/promises');
+      const fs = await import("fs/promises");
       await fs.mkdir(outputDir, { recursive: true });
       const archive = await polyglot.polyglot.openBack(path);
       const entries = await archive.list();
       for (const name of entries) {
         // Sanitize path to prevent directory traversal
-        const safeName = name.replace(/\\/g, '/').split('/').filter(Boolean).join('/');
-        if (!safeName || safeName.split('/').some((part) => part === '..' || part === '.') || safeName.startsWith('.')) {
+        const safeName = name.replace(/\\/g, "/").split("/").filter(Boolean).join("/");
+        if (
+          !safeName ||
+          safeName.split("/").some((part) => part === ".." || part === ".") ||
+          safeName.startsWith(".")
+        ) {
           console.warn(`Skipping suspicious entry: ${name}`);
           continue;
         }
@@ -108,10 +113,13 @@ program
     }
   });
 
-function collectEntries(value: string, previous: { name: string; data: Buffer }[]): { name: string; data: Buffer }[] {
-  const colonIndex = value.indexOf(':');
+function collectEntries(
+  value: string,
+  previous: { name: string; data: Buffer }[]
+): { name: string; data: Buffer }[] {
+  const colonIndex = value.indexOf(":");
   if (colonIndex === -1) {
-    return [...previous, { name: value, data: Buffer.from('') }];
+    return [...previous, { name: value, data: Buffer.from("") }];
   }
   const name = value.slice(0, colonIndex);
   const data = Buffer.from(value.slice(colonIndex + 1));

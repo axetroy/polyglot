@@ -6,11 +6,11 @@
 
 读取归档时，引擎并行检查三个上限：
 
-| 限制 | 默认值 | 含义 |
-| --- | --- | --- |
-| `maxEntries` | 10,000 | 中央目录中允许的最大条目数 |
-| `maxEntrySize` | 1 GiB | 单个条目的解压后大小上限 |
-| `maxTotalSize` | 10 GiB | 所有条目解压后总大小上限 |
+| 限制           | 默认值 | 含义                       |
+| -------------- | ------ | -------------------------- |
+| `maxEntries`   | 10,000 | 中央目录中允许的最大条目数 |
+| `maxEntrySize` | 1 GiB  | 单个条目的解压后大小上限   |
+| `maxTotalSize` | 10 GiB | 所有条目解压后总大小上限   |
 
 超过任一限制都会立即抛出错误，**不继续解压**：
 
@@ -34,15 +34,15 @@ ZIP archive total size exceeds limit: 1152921504606846976 > 1099511627776
 
 ```typescript
 // 全部会被拦截
-sanitizePath('..//etc/passwd');    // ".." component
-sanitizePath('/etc/passwd');       // absolute path
-sanitizePath('..');                // ".." component
-sanitizePath('.');                 // entry path is "."
+sanitizePath("..//etc/passwd"); // ".." component
+sanitizePath("/etc/passwd"); // absolute path
+sanitizePath(".."); // ".." component
+sanitizePath("."); // entry path is "."
 
 // 可以通过
-sanitizePath('foo/../bar');        // ".." component → 拒绝
-sanitizePath('nested/dir.txt');    // ✅
-sanitizePath('a..b.txt');          // ✅（不是精确匹配的 ".."）
+sanitizePath("foo/../bar"); // ".." component → 拒绝
+sanitizePath("nested/dir.txt"); // ✅
+sanitizePath("a..b.txt"); // ✅（不是精确匹配的 ".."）
 ```
 
 CLI 的 `extract` 命令同样依赖这一层校验。
@@ -58,9 +58,9 @@ PNG 必须包含 `IEND` 块才能被判为合法图片；JPEG 缺少 `EOI` 时�
 
 只有显式注册的适配器才会被接受。默认注册的有：
 
-| 前端 | 标识符 |
-| --- | --- |
-| PNG | `'png'` |
+| 前端 | 标识符   |
+| ---- | -------- |
+| PNG  | `'png'`  |
 | JPEG | `'jpeg'` |
 
 不支持的格式（如 GIF、WebP、BMP）在 `create()` 时会抛出 `Unsupported front format: gif`，**不会产出任何输出文件**。后端同理。

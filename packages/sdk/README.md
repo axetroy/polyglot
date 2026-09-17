@@ -11,7 +11,7 @@
 ## 核心 API
 
 ```typescript
-import * as polyglot from '@polyglot/sdk';
+import * as polyglot from "@polyglot/sdk";
 ```
 
 所有接口均指向同一个单例 `PolyglotEngine`，对外暴露的类型与 `@polyglot/core` 一致。
@@ -24,19 +24,19 @@ import * as polyglot from '@polyglot/sdk';
 
 ```typescript
 const file = await polyglot.create({
-  front: './photo.jpg',             // 图片路径 / Buffer / BinarySource
+  front: "./photo.jpg", // 图片路径 / Buffer / BinarySource
   back: {
-    format: 'zip',
+    format: "zip",
     entries: [
-      { name: 'data.bin', data: someBuffer },
-      { name: 'meta.json', data: Buffer.from('{"k":1}') },
+      { name: "data.bin", data: someBuffer },
+      { name: "meta.json", data: Buffer.from('{"k":1}') },
     ],
   },
 });
 
-await file.write('./output.zip');   // 直接写盘
-const buf = file.getBuffer();       // 或内存获取
-const info = await file.getInfo();  // PolyglotInfo
+await file.write("./output.zip"); // 直接写盘
+const buf = file.getBuffer(); // 或内存获取
+const info = await file.getInfo(); // PolyglotInfo
 ```
 
 ### `polyglot.inspect(source)`
@@ -44,7 +44,7 @@ const info = await file.getInfo();  // PolyglotInfo
 返回带前端元数据 + 后端条目数的完整信息。比 `detect()` 重但适合 UI 展示：
 
 ```typescript
-const info = await polyglot.inspect('./output.png');
+const info = await polyglot.inspect("./output.png");
 if (info.polyglot) {
   console.log(`Front: ${info.front.format} (${info.front.size} bytes)`);
   console.log(`Back: ${info.back.format} (${info.back.entries} entries)`);
@@ -56,7 +56,7 @@ if (info.polyglot) {
 轻量探测，仅判断是否 polyglot + 各格式名：
 
 ```typescript
-const result = await polyglot.detect('./file');
+const result = await polyglot.detect("./file");
 // { isPolyglot: true, front: { format: 'png' }, back: { format: 'zip' } }
 ```
 
@@ -65,10 +65,10 @@ const result = await polyglot.detect('./file');
 提取图片字节，支持流式：
 
 ```typescript
-const front = await polyglot.openFront('./polyglot.png');
+const front = await polyglot.openFront("./polyglot.png");
 console.log(`Front format: ${front.format}, size: ${front.size}`);
 for await (const chunk of front.stream()) {
-  process.stdout.write(chunk);     // 直接传给 image-viewer 或管道
+  process.stdout.write(chunk); // 直接传给 image-viewer 或管道
 }
 ```
 
@@ -77,16 +77,16 @@ for await (const chunk of front.stream()) {
 打开归档，列出/读取条目：
 
 ```typescript
-const archive = await polyglot.openBack('./polyglot.png');
-const names = await archive.list();       // string[]
-const data = await archive.read('readme.txt');  // Buffer
+const archive = await polyglot.openBack("./polyglot.png");
+const names = await archive.list(); // string[]
+const data = await archive.read("readme.txt"); // Buffer
 ```
 
 ## 内置支持的组合
 
-| 前端 | 后端 | 模式 |
-|---|---|---|
-| `png` | `zip` | `relocated` |
+| 前端   | 后端  | 模式        |
+| ------ | ----- | ----------- |
+| `png`  | `zip` | `relocated` |
 | `jpeg` | `zip` | `relocated` |
 
 未来可继续注册更多适配器与规则。
@@ -96,7 +96,7 @@ const data = await archive.read('readme.txt');  // Buffer
 如果预配置的组合不够用，可导出底层引擎做扩展：
 
 ```typescript
-import { PolyglotEngine } from '@polyglot/sdk';
+import { PolyglotEngine } from "@polyglot/sdk";
 // 注：当前 SDK 只导出 polyglot 单例；若要自定义引擎请改依赖 @polyglot/core。
 ```
 

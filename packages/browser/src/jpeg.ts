@@ -1,4 +1,4 @@
-import { readU16BE } from './bytes.js';
+import { readU16BE } from "./bytes.js";
 
 export const JPEG_SOI = new Uint8Array([0xff, 0xd8]);
 export const JPEG_EOI = 0xd9;
@@ -15,7 +15,7 @@ export interface JpegSegment {
 }
 
 export interface JpegInfo {
-  format: 'jpeg';
+  format: "jpeg";
   width: number;
   height: number;
   bitDepth: number;
@@ -37,7 +37,7 @@ export function isJpeg(data: Uint8Array): boolean {
  * are never interpreted as image segments.
  */
 export function parseJpeg(data: Uint8Array): JpegInfo {
-  if (!isJpeg(data)) throw new Error('Not a valid JPEG: missing SOI marker');
+  if (!isJpeg(data)) throw new Error("Not a valid JPEG: missing SOI marker");
 
   const segments: JpegSegment[] = [];
   let offset = 2;
@@ -94,7 +94,7 @@ export function parseJpeg(data: Uint8Array): JpegInfo {
   }
 
   return {
-    format: 'jpeg',
+    format: "jpeg",
     width,
     height,
     bitDepth,
@@ -108,9 +108,9 @@ export function parseJpeg(data: Uint8Array): JpegInfo {
 export function validateJpeg(data: Uint8Array): { valid: boolean; error?: string } {
   try {
     const info = parseJpeg(data);
-    if (!info.valid) return { valid: false, error: 'Missing EOI marker' };
+    if (!info.valid) return { valid: false, error: "Missing EOI marker" };
     return { valid: true };
   } catch (err) {
-    return { valid: false, error: err instanceof Error ? err.message : 'Unknown error' };
+    return { valid: false, error: err instanceof Error ? err.message : "Unknown error" };
   }
 }

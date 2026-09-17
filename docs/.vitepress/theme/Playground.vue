@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, onMounted, ref } from 'vue';
+import { computed, onMounted, ref } from "vue";
 import {
   synthesize,
   inspect,
@@ -7,14 +7,14 @@ import {
   detectFrontFormat,
   type PolyglotInspection,
   type ZipEntryInput,
-} from '@polyglot/browser';
+} from "@polyglot/browser";
 
-type Mode = 'create' | 'inspect';
+type Mode = "create" | "inspect";
 
 interface EditorEntry {
   id: number;
   name: string;
-  kind: 'text' | 'binary';
+  kind: "text" | "binary";
   text: string;
   data: Uint8Array | null;
 }
@@ -39,8 +39,8 @@ interface InspectResult {
   extracted: Array<{ name: string; size: number; preview: string | null }>;
 }
 
-const mode = ref<Mode>('create');
-const error = ref('');
+const mode = ref<Mode>("create");
+const error = ref("");
 const busy = ref(false);
 
 // ── Create state ──────────────────────────────────────────
@@ -55,12 +55,14 @@ let nextId = 1;
 const inspectResult = ref<InspectResult | null>(null);
 
 const frontFormatLabel = computed(() => {
-  if (!frontBytes.value) return '';
+  if (!frontBytes.value) return "";
   const format = detectFrontFormat(frontBytes.value);
-  return format ? format.toUpperCase() : '未知格式';
+  return format ? format.toUpperCase() : "未知格式";
 });
 
-const canSynthesize = computed(() => Boolean(frontBytes.value) && entries.value.length > 0 && !busy.value);
+const canSynthesize = computed(
+  () => Boolean(frontBytes.value) && entries.value.length > 0 && !busy.value
+);
 
 const formatBytes = (n: number) => {
   if (n < 1024) return `${n} B`;
@@ -78,7 +80,7 @@ function clearOutput() {
     }
   }
   inspectResult.value = null;
-  error.value = '';
+  error.value = "";
 }
 
 function readFileBytes(file: File): Promise<Uint8Array> {
@@ -114,14 +116,20 @@ function clearFront() {
 
 // ── Entry editing ─────────────────────────────────────────
 function addTextEntry() {
-  entries.value.push({ id: nextId++, name: `entry-${entries.value.length + 1}.txt`, kind: 'text', text: '', data: null });
+  entries.value.push({
+    id: nextId++,
+    name: `entry-${entries.value.length + 1}.txt`,
+    kind: "text",
+    text: "",
+    data: null,
+  });
 }
 
 async function addBinaryEntries(files: FileList | null) {
   if (!files) return;
   for (const file of Array.from(files)) {
     const data = await readFileBytes(file);
-    entries.value.push({ id: nextId++, name: file.name, kind: 'binary', text: '', data });
+    entries.value.push({ id: nextId++, name: file.name, kind: "binary", text: "", data });
   }
 }
 
@@ -136,13 +144,16 @@ function clearEntries() {
 /** Materialise the editor rows into the payload the engine consumes. */
 function collectEntries(): ZipEntryInput[] {
   return entries.value.map((entry) => ({
-    name: entry.name.trim() || 'unnamed',
-    data: entry.kind === 'text' ? new TextEncoder().encode(entry.text) : (entry.data ?? new Uint8Array(0)),
+    name: entry.name.trim() || "unnamed",
+    data:
+      entry.kind === "text"
+        ? new TextEncoder().encode(entry.text)
+        : (entry.data ?? new Uint8Array(0)),
   }));
 }
 
 function entrySize(entry: EditorEntry): number {
-  if (entry.kind === 'text') return new TextEncoder().encode(entry.text).length;
+  if (entry.kind === "text") return new TextEncoder().encode(entry.text).length;
   return entry.data?.length ?? 0;
 }
 
@@ -154,8 +165,8 @@ function runSynthesize() {
 
   try {
     const output = synthesize(frontBytes.value, { entries: collectEntries() });
-    const ext = output.frontFormat === 'png' ? 'png' : 'jpg';
-    const blob = new Blob([output.data as BlobPart], { type: 'application/octet-stream' });
+    const ext = output.frontFormat === "png" ? "png" : "jpg";
+    const blob = new Blob([output.data as BlobPart], { type: "application/octet-stream" });
 
     result.value = {
       blobUrl: URL.createObjectURL(blob),
@@ -191,12 +202,12 @@ async function onInspectSelected(files: FileList | null) {
       frontPreviewUrl = URL.createObjectURL(new Blob([bytes.subarray(0, frontEnd) as BlobPart]));
     }
 
-    let extracted: InspectResult['extracted'] = [];
+    let extracted: InspectResult["extracted"] = [];
     if (info.isPolyglot) {
       const parts = await extract(bytes);
       extracted = parts.entries.map((entry) => {
         const isText = !/[\u0000-\u0008\u000e-\u001f]/.test(
-          new TextDecoder('utf-8', { fatal: false }).decode(entry.data.subarray(0, 512)),
+          new TextDecoder("utf-8", { fatal: false }).decode(entry.data.subarray(0, 512))
         );
         return {
           name: entry.name,
@@ -206,7 +217,13 @@ async function onInspectSelected(files: FileList | null) {
       });
     }
 
-    inspectResult.value = { info, fileName: file.name, fileSize: bytes.length, frontPreview: frontPreviewUrl, extracted };
+    inspectResult.value = {
+      info,
+      fileName: file.name,
+      fileSize: bytes.length,
+      frontPreview: frontPreviewUrl,
+      extracted,
+    };
   } catch (err) {
     error.value = err instanceof Error ? err.message : String(err);
   } finally {
@@ -217,9 +234,9 @@ async function onInspectSelected(files: FileList | null) {
 function downloadEntry(name: string, index: number) {
   const entry = inspectResult.value?.extracted[index];
   if (!entry) return;
-  const blob = new Blob([entry.preview ?? ''], { type: 'application/octet-stream' });
+  const blob = new Blob([entry.preview ?? ""], { type: "application/octet-stream" });
   const url = URL.createObjectURL(blob);
-  const link = document.createElement('a');
+  const link = document.createElement("a");
   link.href = url;
   link.download = name;
   link.click();
@@ -228,15 +245,19 @@ function downloadEntry(name: string, index: number) {
 
 onMounted(() => {
   // Guard: SSR renders no interactive state.
-  if (typeof window === 'undefined') return;
+  if (typeof window === "undefined") return;
 });
 </script>
 
 <template>
   <div class="pg-root">
     <div class="pg-tabs">
-      <button :class="['pg-tab', { active: mode === 'create' }]" @click="mode = 'create'">合成 Create</button>
-      <button :class="['pg-tab', { active: mode === 'inspect' }]" @click="mode = 'inspect'">解析 Inspect</button>
+      <button :class="['pg-tab', { active: mode === 'create' }]" @click="mode = 'create'">
+        合成 Create
+      </button>
+      <button :class="['pg-tab', { active: mode === 'inspect' }]" @click="mode = 'inspect'">
+        解析 Inspect
+      </button>
     </div>
 
     <p v-if="error" class="pg-error">{{ error }}</p>
@@ -248,7 +269,11 @@ onMounted(() => {
         <section class="pg-card">
           <h3>① 前端图像 Front image</h3>
           <label class="pg-drop">
-            <input type="file" accept="image/png,image/jpeg" @change="onFrontSelected(($event.target as HTMLInputElement).files)" />
+            <input
+              type="file"
+              accept="image/png,image/jpeg"
+              @change="onFrontSelected(($event.target as HTMLInputElement).files)"
+            />
             <span class="pg-drop-icon">🖼️</span>
             <span class="pg-drop-text">拖拽或<strong>点击选择</strong> PNG / JPEG</span>
           </label>
@@ -256,9 +281,18 @@ onMounted(() => {
           <div v-if="frontPreview" class="pg-preview">
             <img :src="frontPreview" alt="front preview" />
             <dl>
-              <div><dt>文件 File</dt><dd>{{ frontFile?.name }}</dd></div>
-              <div><dt>格式 Format</dt><dd>{{ frontFormatLabel }}</dd></div>
-              <div><dt>大小 Size</dt><dd>{{ formatBytes(frontBytes?.length ?? 0) }}</dd></div>
+              <div>
+                <dt>文件 File</dt>
+                <dd>{{ frontFile?.name }}</dd>
+              </div>
+              <div>
+                <dt>格式 Format</dt>
+                <dd>{{ frontFormatLabel }}</dd>
+              </div>
+              <div>
+                <dt>大小 Size</dt>
+                <dd>{{ formatBytes(frontBytes?.length ?? 0) }}</dd>
+              </div>
             </dl>
             <button class="pg-btn-ghost" @click="clearFront">移除</button>
           </div>
@@ -267,7 +301,9 @@ onMounted(() => {
         <!-- Entries -->
         <section class="pg-card">
           <h3>② 归档条目 Archive entries</h3>
-          <p v-if="entries.length === 0" class="pg-hint">还没有条目。添加文本条目，或上传任意文件作为二进制条目。</p>
+          <p v-if="entries.length === 0" class="pg-hint">
+            还没有条目。添加文本条目，或上传任意文件作为二进制条目。
+          </p>
 
           <div v-for="entry in entries" :key="entry.id" class="pg-entry">
             <div class="pg-entry-head">
@@ -289,14 +325,18 @@ onMounted(() => {
             <button class="pg-btn-ghost" @click="addTextEntry">＋ 文本条目</button>
             <label class="pg-btn-ghost pg-file-label">
               ＋ 上传文件
-              <input type="file" multiple @change="addBinaryEntries(($event.target as HTMLInputElement).files)" />
+              <input
+                type="file"
+                multiple
+                @change="addBinaryEntries(($event.target as HTMLInputElement).files)"
+              />
             </label>
             <button v-if="entries.length" class="pg-btn-ghost" @click="clearEntries">清空</button>
           </div>
         </section>
 
         <button class="pg-btn-primary" :disabled="!canSynthesize" @click="runSynthesize">
-          {{ busy ? '合成中…' : '合成 Polyglot 文件' }}
+          {{ busy ? "合成中…" : "合成 Polyglot 文件" }}
         </button>
       </div>
 
@@ -308,18 +348,33 @@ onMounted(() => {
 
           <template v-else>
             <dl class="pg-metrics">
-              <div><dt>前端</dt><dd>{{ formatBytes(result.frontSize) }}</dd></div>
-              <div><dt>后端</dt><dd>{{ formatBytes(result.backSize) }}</dd></div>
-              <div><dt>总计</dt><dd>{{ formatBytes(result.totalSize) }}</dd></div>
-              <div><dt>条目</dt><dd>{{ result.entryCount }}</dd></div>
+              <div>
+                <dt>前端</dt>
+                <dd>{{ formatBytes(result.frontSize) }}</dd>
+              </div>
+              <div>
+                <dt>后端</dt>
+                <dd>{{ formatBytes(result.backSize) }}</dd>
+              </div>
+              <div>
+                <dt>总计</dt>
+                <dd>{{ formatBytes(result.totalSize) }}</dd>
+              </div>
+              <div>
+                <dt>条目</dt>
+                <dd>{{ result.entryCount }}</dd>
+              </div>
             </dl>
 
             <img class="pg-result-img" :src="result.blobUrl" alt="result preview" />
             <p class="pg-hint">
-              {{ result.frontFormat }} · {{ result.width }}×{{ result.height }} — 图片查看器正常显示，ZIP 工具可读取偏移量处的归档。
+              {{ result.frontFormat }} · {{ result.width }}×{{ result.height }} —
+              图片查看器正常显示，ZIP 工具可读取偏移量处的归档。
             </p>
 
-            <a class="pg-btn-primary pg-download" :href="result.blobUrl" :download="result.fileName">⬇ 下载 {{ result.fileName }}</a>
+            <a class="pg-btn-primary pg-download" :href="result.blobUrl" :download="result.fileName"
+              >⬇ 下载 {{ result.fileName }}</a
+            >
           </template>
         </section>
       </div>
@@ -330,7 +385,10 @@ onMounted(() => {
       <section class="pg-card">
         <h3>选择文件 Inspect a file</h3>
         <label class="pg-drop">
-          <input type="file" @change="onInspectSelected(($event.target as HTMLInputElement).files)" />
+          <input
+            type="file"
+            @change="onInspectSelected(($event.target as HTMLInputElement).files)"
+          />
           <span class="pg-drop-icon">🔍</span>
           <span class="pg-drop-text">拖拽或<strong>点击选择</strong>任意文件</span>
         </label>
@@ -339,20 +397,41 @@ onMounted(() => {
       <section v-if="inspectResult" class="pg-card">
         <h3>检测结果 Inspection</h3>
         <p class="pg-verdict" :class="inspectResult.info.isPolyglot ? 'ok' : 'no'">
-          {{ inspectResult.info.isPolyglot ? '✓ 这是一个 polyglot 文件' : '✗ 不是 polyglot 文件' }}
+          {{ inspectResult.info.isPolyglot ? "✓ 这是一个 polyglot 文件" : "✗ 不是 polyglot 文件" }}
         </p>
-        <p class="pg-hint">{{ inspectResult.fileName }} · {{ formatBytes(inspectResult.fileSize) }}</p>
+        <p class="pg-hint">
+          {{ inspectResult.fileName }} · {{ formatBytes(inspectResult.fileSize) }}
+        </p>
 
         <div class="pg-inspect-grid">
           <div>
             <h4>前端 Front</h4>
             <template v-if="inspectResult.info.front">
-              <img v-if="inspectResult.frontPreview" class="pg-result-img" :src="inspectResult.frontPreview" alt="front" />
+              <img
+                v-if="inspectResult.frontPreview"
+                class="pg-result-img"
+                :src="inspectResult.frontPreview"
+                alt="front"
+              />
               <dl class="pg-kv">
-                <div><dt>格式</dt><dd>{{ inspectResult.info.front.format.toUpperCase() }}</dd></div>
-                <div><dt>尺寸</dt><dd>{{ inspectResult.info.front.width }}×{{ inspectResult.info.front.height }}</dd></div>
-                <div><dt>字节</dt><dd>{{ formatBytes(inspectResult.info.front.size) }}</dd></div>
-                <div><dt>有效</dt><dd>{{ inspectResult.info.front.valid ? '是' : '否' }}</dd></div>
+                <div>
+                  <dt>格式</dt>
+                  <dd>{{ inspectResult.info.front.format.toUpperCase() }}</dd>
+                </div>
+                <div>
+                  <dt>尺寸</dt>
+                  <dd>
+                    {{ inspectResult.info.front.width }}×{{ inspectResult.info.front.height }}
+                  </dd>
+                </div>
+                <div>
+                  <dt>字节</dt>
+                  <dd>{{ formatBytes(inspectResult.info.front.size) }}</dd>
+                </div>
+                <div>
+                  <dt>有效</dt>
+                  <dd>{{ inspectResult.info.front.valid ? "是" : "否" }}</dd>
+                </div>
               </dl>
             </template>
             <p v-else class="pg-hint">未识别到图像前端。</p>
@@ -362,9 +441,18 @@ onMounted(() => {
             <h4>后端 Back</h4>
             <template v-if="inspectResult.info.back">
               <dl class="pg-kv">
-                <div><dt>格式</dt><dd>ZIP</dd></div>
-                <div><dt>条目</dt><dd>{{ inspectResult.info.back.entryCount }}</dd></div>
-                <div><dt>字节</dt><dd>{{ formatBytes(inspectResult.info.back.size) }}</dd></div>
+                <div>
+                  <dt>格式</dt>
+                  <dd>ZIP</dd>
+                </div>
+                <div>
+                  <dt>条目</dt>
+                  <dd>{{ inspectResult.info.back.entryCount }}</dd>
+                </div>
+                <div>
+                  <dt>字节</dt>
+                  <dd>{{ formatBytes(inspectResult.info.back.size) }}</dd>
+                </div>
               </dl>
               <ul class="pg-entry-list">
                 <li v-for="(entry, index) in inspectResult.extracted" :key="entry.name">
@@ -384,13 +472,14 @@ onMounted(() => {
     <!-- How it works -->
     <section class="pg-card pg-diagram">
       <h3>原理 How it works</h3>
-      <pre>┌──────────────────────────┬────────────────────────────┐
+      <pre>
+┌──────────────────────────┬────────────────────────────┐
 │   PNG / JPEG 字节         │   ZIP 归档（偏移已重定位）    │
 │   图片查看器可读           │   ZIP 工具可读取             │
 └──────────────────────────┴────────────────────────────┘</pre>
       <p class="pg-hint">
-        图像字节原样保留；归档中所有绝对偏移量（EOCD 与中央目录指针）统一加上图像长度，
-        因此 ZIP 读取器能正确定位到归档内部。全部处理在浏览器本地完成，文件不会上传。
+        图像字节原样保留；归档中所有绝对偏移量（EOCD 与中央目录指针）统一加上图像长度， 因此 ZIP
+        读取器能正确定位到归档内部。全部处理在浏览器本地完成，文件不会上传。
       </p>
     </section>
   </div>

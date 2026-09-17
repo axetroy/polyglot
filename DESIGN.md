@@ -262,24 +262,15 @@ Core Engine 不直接理解 PNG、JPEG、ZIP。
 
 ```ts
 interface PolyglotEngine {
-
   create(options: CreateOptions): Promise<PolyglotFile>;
 
-  inspect(
-    source: BinarySource
-  ): Promise<PolyglotInfo>;
+  inspect(source: BinarySource): Promise<PolyglotInfo>;
 
-  detect(
-    source: BinarySource
-  ): Promise<DetectionResult>;
+  detect(source: BinarySource): Promise<DetectionResult>;
 
-  openFront(
-    source: BinarySource
-  ): Promise<FrontFile>;
+  openFront(source: BinarySource): Promise<FrontFile>;
 
-  openBack(
-    source: BinarySource
-  ): Promise<Archive>;
+  openBack(source: BinarySource): Promise<Archive>;
 }
 ```
 
@@ -320,24 +311,15 @@ Registry
 
 ```ts
 interface FrontAdapter {
-
   id: string;
 
-  detect(
-    source: BinarySource
-  ): Promise<boolean>;
+  detect(source: BinarySource): Promise<boolean>;
 
-  inspect(
-    source: BinarySource
-  ): Promise<FrontInfo>;
+  inspect(source: BinarySource): Promise<FrontInfo>;
 
-  validate(
-    source: BinarySource
-  ): Promise<ValidationResult>;
+  validate(source: BinarySource): Promise<ValidationResult>;
 
-  getLayout(
-    info: FrontInfo
-  ): Promise<FrontLayout>;
+  getLayout(info: FrontInfo): Promise<FrontLayout>;
 }
 ```
 
@@ -377,24 +359,15 @@ Segment Parser
 
 ```ts
 interface BackAdapter {
-
   id: string;
 
-  create(
-    entries: ArchiveEntry[]
-  ): Promise<ArchiveBinary>;
+  create(entries: ArchiveEntry[]): Promise<ArchiveBinary>;
 
-  inspect(
-    source: BinarySource
-  ): Promise<ArchiveInfo>;
+  inspect(source: BinarySource): Promise<ArchiveInfo>;
 
-  parse(
-    source: BinarySource
-  ): Promise<Archive>;
+  parse(source: BinarySource): Promise<Archive>;
 
-  getLayout(
-    archive: ArchiveBinary
-  ): Promise<ArchiveLayout>;
+  getLayout(archive: ArchiveBinary): Promise<ArchiveLayout>;
 }
 ```
 
@@ -576,7 +549,7 @@ ZIP Writer
 而不是简单：
 
 ```ts
-Buffer.concat([front, zip])
+Buffer.concat([front, zip]);
 ```
 
 ---
@@ -586,10 +559,7 @@ Buffer.concat([front, zip])
 简单拼接：
 
 ```ts
-Buffer.concat([
-  front,
-  zip
-]);
+Buffer.concat([front, zip]);
 ```
 
 只能保证：
@@ -634,18 +604,13 @@ Front × Back = Compatibility Rule
 
 ```ts
 interface CompatibilityRule {
-
   front: string;
 
   back: string;
 
   supported: boolean;
 
-  mode:
-    | "native"
-    | "relocated"
-    | "experimental"
-    | "unsupported";
+  mode: "native" | "relocated" | "experimental" | "unsupported";
 }
 ```
 
@@ -730,10 +695,10 @@ const result = await polyglot.create({
     entries: [
       {
         name: "hello.txt",
-        data: Buffer.from("hello")
-      }
-    ]
-  }
+        data: Buffer.from("hello"),
+      },
+    ],
+  },
 });
 
 await result.write("./output.png");
@@ -744,9 +709,7 @@ await result.write("./output.png");
 # 17. Inspect API
 
 ```ts
-const info = await polyglot.inspect(
-  "./output.png"
-);
+const info = await polyglot.inspect("./output.png");
 ```
 
 返回：
@@ -772,9 +735,7 @@ const info = await polyglot.inspect(
 # 18. Open Front
 
 ```ts
-const front = await polyglot.openFront(
-  "./output.png"
-);
+const front = await polyglot.openFront("./output.png");
 ```
 
 得到：
@@ -792,9 +753,7 @@ const front = await polyglot.openFront(
 # 19. Open Back
 
 ```ts
-const archive = await polyglot.openBack(
-  "./output.png"
-);
+const archive = await polyglot.openBack("./output.png");
 ```
 
 然后：
@@ -814,9 +773,7 @@ thumbnail.jpg
 读取：
 
 ```ts
-const data = await archive.read(
-  "data.json"
-);
+const data = await archive.read("data.json");
 ```
 
 ---
@@ -908,7 +865,7 @@ API：
 ```ts
 await polyglot.createStream({
   front: frontStream,
-  back: archive
+  back: archive,
 });
 ```
 
@@ -928,7 +885,7 @@ ReadableStream
 统一为：
 
 ```ts
-BinarySource
+BinarySource;
 ```
 
 这样 Core Engine 不关心数据来源。
@@ -970,20 +927,15 @@ Malformed Archive
 ```ts
 class PolyglotError extends Error {}
 
-class UnsupportedFormatError
-  extends PolyglotError {}
+class UnsupportedFormatError extends PolyglotError {}
 
-class IncompatibleFormatError
-  extends PolyglotError {}
+class IncompatibleFormatError extends PolyglotError {}
 
-class InvalidFrontError
-  extends PolyglotError {}
+class InvalidFrontError extends PolyglotError {}
 
-class InvalidArchiveError
-  extends PolyglotError {}
+class InvalidArchiveError extends PolyglotError {}
 
-class RelocationError
-  extends PolyglotError {}
+class RelocationError extends PolyglotError {}
 ```
 
 例如：
@@ -1362,10 +1314,10 @@ const file = await polyglot.create({
     entries: [
       {
         name: "hello.txt",
-        data: Buffer.from("Hello")
-      }
-    ]
-  }
+        data: Buffer.from("Hello"),
+      },
+    ],
+  },
 });
 
 await file.write("./output.png");
@@ -1374,25 +1326,19 @@ await file.write("./output.png");
 检查：
 
 ```ts
-const info = await polyglot.inspect(
-  "./output.png"
-);
+const info = await polyglot.inspect("./output.png");
 ```
 
 读取 Front：
 
 ```ts
-const front = await polyglot.openFront(
-  "./output.png"
-);
+const front = await polyglot.openFront("./output.png");
 ```
 
 读取 Back：
 
 ```ts
-const archive = await polyglot.openBack(
-  "./output.png"
-);
+const archive = await polyglot.openBack("./output.png");
 ```
 
 ---

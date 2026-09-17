@@ -14,26 +14,26 @@ npm test -- tests/compatibility/third-party.test.ts
 
 每次测试使用同一组条目，覆盖容易被忽略的边界：
 
-| 条目 | 覆盖点 |
-| --- | --- |
-| `hello.txt` | 普通文本内容 |
-| `sub/dir/note.md` | 多级目录路径 |
-| `中文文档.txt` | 非 ASCII 文件名（UTF-8 标志位） |
-| `empty.txt` | 零字节条目 |
-| `binary.bin` | 含 `0x00` / `0xFF` 的二进制内容、CRC 校验 |
+| 条目              | 覆盖点                                    |
+| ----------------- | ----------------------------------------- |
+| `hello.txt`       | 普通文本内容                              |
+| `sub/dir/note.md` | 多级目录路径                              |
+| `中文文档.txt`    | 非 ASCII 文件名（UTF-8 标志位）           |
+| `empty.txt`       | 零字节条目                                |
+| `binary.bin`      | 含 `0x00` / `0xFF` 的二进制内容、CRC 校验 |
 
 前端图片为 512×512 PNG（约 390 KB），保证偏移量是一个真实且不小的数值。
 
 ## 实测结果
 
-| 工具 | 实现 | 列举 | 解压 | 内容比对 | 备注 |
-| --- | --- | --- | --- | --- | --- |
-| `unzip` / `zipinfo` | Info-ZIP | ✅ | ✅ | ✅ 一致 | 无 `extra bytes` 警告；`unzip -t` 报 `No errors detected` |
-| `bsdtar` / `tar` | libarchive | ✅ | ✅ | ✅ 一致 | macOS Archive Utility、Windows 11 资源管理器同源 |
-| Python `zipfile` | CPython stdlib | ✅ | ✅ | ✅ 一致 | `testzip()` 返回 `None`（CRC 全部通过） |
-| 7-Zip (`7zz`) | Igor Pavlov | ✅ | ✅ | ✅ 一致 | 输出 `Embedded Stub Size` 提示，属正常识别 SFX 前缀 |
-| `ditto` | Apple | ❌ | ❌ | — | 报 `Couldn't read PKZip signature`，见下文「已知不支持」 |
-| `jar` / `java.util.zip` | OpenJDK | 未测 | 未测 | — | 本机未安装 JDK；逻辑上与 Info-ZIP 同类 |
+| 工具                    | 实现           | 列举 | 解压 | 内容比对 | 备注                                                      |
+| ----------------------- | -------------- | ---- | ---- | -------- | --------------------------------------------------------- |
+| `unzip` / `zipinfo`     | Info-ZIP       | ✅   | ✅   | ✅ 一致  | 无 `extra bytes` 警告；`unzip -t` 报 `No errors detected` |
+| `bsdtar` / `tar`        | libarchive     | ✅   | ✅   | ✅ 一致  | macOS Archive Utility、Windows 11 资源管理器同源          |
+| Python `zipfile`        | CPython stdlib | ✅   | ✅   | ✅ 一致  | `testzip()` 返回 `None`（CRC 全部通过）                   |
+| 7-Zip (`7zz`)           | Igor Pavlov    | ✅   | ✅   | ✅ 一致  | 输出 `Embedded Stub Size` 提示，属正常识别 SFX 前缀       |
+| `ditto`                 | Apple          | ❌   | ❌   | —        | 报 `Couldn't read PKZip signature`，见下文「已知不支持」  |
+| `jar` / `java.util.zip` | OpenJDK        | 未测 | 未测 | —        | 本机未安装 JDK；逻辑上与 Info-ZIP 同类                    |
 
 > 关于 7-Zip 的提示：它会打印 `Warning: The archive is open with offset` 并给出 `Embedded Stub Size = <图片字节数>`。这是 7-Zip **正确识别出**文件前部有一个自解压式前缀（SFX stub），随后 `Everything is Ok` 正常解压。这是信息性输出，不是错误。
 
@@ -63,21 +63,21 @@ npm test -- tests/compatibility/third-party.test.ts
 
 因为偏移量现在是相对**整个文件**记录的，如果手动把图片前缀丢掉、只保留后面的 ZIP 片段并另存为文件，偏移量会比片段自身大一个前缀长度：
 
-| 工具 | 对「切出来的片段」的行为 |
-| --- | --- |
-| `unzip` | 报 `missing N bytes in zipfile`，但仍会 `attempting to process anyway` 并成功解压 |
-| Python `zipfile` | ✅ 正常，CRC 通过 |
-| `bsdtar` | ✅ 正常 |
-| 7-Zip | ✅ 正常 |
+| 工具             | 对「切出来的片段」的行为                                                          |
+| ---------------- | --------------------------------------------------------------------------------- |
+| `unzip`          | 报 `missing N bytes in zipfile`，但仍会 `attempting to process anyway` 并成功解压 |
+| Python `zipfile` | ✅ 正常，CRC 通过                                                                 |
+| `bsdtar`         | ✅ 正常                                                                           |
+| 7-Zip            | ✅ 正常                                                                           |
 
 这是本方案与「垫字节布局」之间的取舍：垫字节布局让「切出来的片段」完美，却让**主产物**（polyglot 文件本身）出现警告，且 7-Zip 直接拒绝打开、体积翻倍。主产物才是用户交给别人的东西，因此选择优化主产物，并用本测试套件把「切片段」的降级行为固定下来。
 
 ## 支持的组合
 
-| 前端 | 后端 | 支持 | 模式 |
-| --- | --- | --- | --- |
-| PNG | ZIP | ✅ | `relocated` |
-| JPEG | ZIP | ✅ | `relocated` |
-| 其他组合 | — | ❌ | `unsupported` |
+| 前端     | 后端 | 支持 | 模式          |
+| -------- | ---- | ---- | ------------- |
+| PNG      | ZIP  | ✅   | `relocated`   |
+| JPEG     | ZIP  | ✅   | `relocated`   |
+| 其他组合 | —    | ❌   | `unsupported` |
 
 未注册的组合一律视为 `unsupported`，`create()` 会直接抛出 `Unsupported back format`，而不是产出损坏的文件。

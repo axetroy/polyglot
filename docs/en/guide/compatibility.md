@@ -14,26 +14,26 @@ Tools that are not installed are skipped automatically (they do not fail the sui
 
 Every run uses the same set of entries, chosen to cover the boundaries that are easy to overlook:
 
-| Entry | What it covers |
-| --- | --- |
-| `hello.txt` | Ordinary text content |
-| `sub/dir/note.md` | Multi-level directory path |
-| `中文文档.txt` | Non-ASCII file name (UTF-8 flag bit 11) |
-| `empty.txt` | Zero-byte entry |
-| `binary.bin` | Binary content with `0x00` / `0xFF`, plus CRC verification |
+| Entry             | What it covers                                             |
+| ----------------- | ---------------------------------------------------------- |
+| `hello.txt`       | Ordinary text content                                      |
+| `sub/dir/note.md` | Multi-level directory path                                 |
+| `中文文档.txt`    | Non-ASCII file name (UTF-8 flag bit 11)                    |
+| `empty.txt`       | Zero-byte entry                                            |
+| `binary.bin`      | Binary content with `0x00` / `0xFF`, plus CRC verification |
 
 The front image is a 512×512 PNG (about 390 KB), so the offset is a real, non-trivial value.
 
 ## Measured results
 
-| Tool | Implementation | List | Extract | Content comparison | Notes |
-| --- | --- | --- | --- | --- | --- |
-| `unzip` / `zipinfo` | Info-ZIP | ✅ | ✅ | ✅ identical | No `extra bytes` warning; `unzip -t` reports `No errors detected` |
-| `bsdtar` / `tar` | libarchive | ✅ | ✅ | ✅ identical | Same lineage as macOS Archive Utility and Windows 11 File Explorer |
-| Python `zipfile` | CPython stdlib | ✅ | ✅ | ✅ identical | `testzip()` returns `None` (all CRCs pass) |
-| 7-Zip (`7zz`) | Igor Pavlov | ✅ | ✅ | ✅ identical | Prints an `Embedded Stub Size` notice — correct recognition of the SFX prefix |
-| `ditto` | Apple | ❌ | ❌ | — | Reports `Couldn't read PKZip signature`, see "Known limitations" below |
-| `jar` / `java.util.zip` | OpenJDK | not tested | not tested | — | No JDK on the test machine; logically the same class as Info-ZIP |
+| Tool                    | Implementation | List       | Extract    | Content comparison | Notes                                                                         |
+| ----------------------- | -------------- | ---------- | ---------- | ------------------ | ----------------------------------------------------------------------------- |
+| `unzip` / `zipinfo`     | Info-ZIP       | ✅         | ✅         | ✅ identical       | No `extra bytes` warning; `unzip -t` reports `No errors detected`             |
+| `bsdtar` / `tar`        | libarchive     | ✅         | ✅         | ✅ identical       | Same lineage as macOS Archive Utility and Windows 11 File Explorer            |
+| Python `zipfile`        | CPython stdlib | ✅         | ✅         | ✅ identical       | `testzip()` returns `None` (all CRCs pass)                                    |
+| 7-Zip (`7zz`)           | Igor Pavlov    | ✅         | ✅         | ✅ identical       | Prints an `Embedded Stub Size` notice — correct recognition of the SFX prefix |
+| `ditto`                 | Apple          | ❌         | ❌         | —                  | Reports `Couldn't read PKZip signature`, see "Known limitations" below        |
+| `jar` / `java.util.zip` | OpenJDK        | not tested | not tested | —                  | No JDK on the test machine; logically the same class as Info-ZIP              |
 
 > About the 7-Zip notice: it prints `Warning: The archive is open with offset` and reports `Embedded Stub Size = <image byte count>`. This is 7-Zip **correctly recognising** that the file is fronted by a self-extracting-style prefix (an SFX stub); extraction then reports `Everything is Ok`. It is informational output, not an error.
 
@@ -63,21 +63,21 @@ Examples: Apple `ditto`, and parts of Finder's extraction path.
 
 Because offsets are now recorded relative to the **whole file**, if you manually drop the image prefix, keep only the trailing ZIP slice and save it as a standalone file, the offsets are larger than that fragment by the prefix length:
 
-| Tool | Behaviour on the "sliced-out fragment" |
-| --- | --- |
-| `unzip` | Reports `missing N bytes in zipfile`, but still says `attempting to process anyway` and extracts successfully |
-| Python `zipfile` | ✅ normal, CRCs pass |
-| `bsdtar` | ✅ normal |
-| 7-Zip | ✅ normal |
+| Tool             | Behaviour on the "sliced-out fragment"                                                                        |
+| ---------------- | ------------------------------------------------------------------------------------------------------------- |
+| `unzip`          | Reports `missing N bytes in zipfile`, but still says `attempting to process anyway` and extracts successfully |
+| Python `zipfile` | ✅ normal, CRCs pass                                                                                          |
+| `bsdtar`         | ✅ normal                                                                                                     |
+| 7-Zip            | ✅ normal                                                                                                     |
 
 This is the trade-off against the "padded layout": padding made the sliced-out fragment perfect, but it broke the **primary artifact** (the polyglot file itself) with warnings, outright refusal by 7-Zip, and double the size. The primary artifact is what users hand to other people, so that is the one optimised here, and this test suite pins down the degraded behaviour of the fragment.
 
 ## Supported combinations
 
-| Front | Back | Supported | Mode |
-| --- | --- | --- | --- |
-| PNG | ZIP | ✅ | `relocated` |
-| JPEG | ZIP | ✅ | `relocated` |
-| any other pair | — | ❌ | `unsupported` |
+| Front          | Back | Supported | Mode          |
+| -------------- | ---- | --------- | ------------- |
+| PNG            | ZIP  | ✅        | `relocated`   |
+| JPEG           | ZIP  | ✅        | `relocated`   |
+| any other pair | —    | ❌        | `unsupported` |
 
 Unregistered pairs are always treated as `unsupported`, and `create()` throws `Unsupported back format` instead of producing a corrupted file.

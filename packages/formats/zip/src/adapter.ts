@@ -1,10 +1,10 @@
-import type { BackAdapter, BinarySource } from '@polyglot/binary';
-import { BufferSource, PathSource } from '@polyglot/binary';
-import { parseZip, type ZipArchive } from './parser.js';
-import { buildZip, relocateZipOffsets, type ZipEntryData } from './writer.js';
+import type { BackAdapter, BinarySource } from "@polyglot/binary";
+import { BufferSource, PathSource } from "@polyglot/binary";
+import { parseZip, type ZipArchive } from "./parser.js";
+import { buildZip, relocateZipOffsets, type ZipEntryData } from "./writer.js";
 
 export interface ZipLayout {
-  format: 'zip';
+  format: "zip";
   size: number;
   entries: number;
   centralDirOffset: number;
@@ -12,7 +12,7 @@ export interface ZipLayout {
 }
 
 export class ZipAdapter implements BackAdapter {
-  readonly id = 'zip';
+  readonly id = "zip";
 
   async create(entries: ZipEntryData[]): Promise<Uint8Array> {
     return buildZip(entries);
@@ -21,7 +21,7 @@ export class ZipAdapter implements BackAdapter {
   async inspect(source: BinarySource): Promise<{ format: string; size: number; entries: number }> {
     const archive = await this.parse(source);
     return {
-      format: 'zip',
+      format: "zip",
       size: archive.raw.length,
       entries: archive.entries.length,
     };
@@ -46,18 +46,24 @@ export class ZipAdapter implements BackAdapter {
     }
 
     if (eocdOffset === -1) {
-      throw new Error('Invalid ZIP: EOCD not found');
+      throw new Error("Invalid ZIP: EOCD not found");
     }
 
     const cdSizeBuf = archive.subarray(eocdOffset + 12, eocdOffset + 16);
     const cdOffsetBuf = archive.subarray(eocdOffset + 16, eocdOffset + 20);
     const entriesBuf = archive.subarray(eocdOffset + 10, eocdOffset + 12);
-    const centralDirSize = (cdSizeBuf[0]! | (cdSizeBuf[1]! << 8) | (cdSizeBuf[2]! << 16) | (cdSizeBuf[3]! << 24)) >>> 0;
-    const centralDirOffset = (cdOffsetBuf[0]! | (cdOffsetBuf[1]! << 8) | (cdOffsetBuf[2]! << 16) | (cdOffsetBuf[3]! << 24)) >>> 0;
+    const centralDirSize =
+      (cdSizeBuf[0]! | (cdSizeBuf[1]! << 8) | (cdSizeBuf[2]! << 16) | (cdSizeBuf[3]! << 24)) >>> 0;
+    const centralDirOffset =
+      (cdOffsetBuf[0]! |
+        (cdOffsetBuf[1]! << 8) |
+        (cdOffsetBuf[2]! << 16) |
+        (cdOffsetBuf[3]! << 24)) >>>
+      0;
     const centralDirEntriesTotal = entriesBuf[0]! | (entriesBuf[1]! << 8);
 
     return {
-      format: 'zip',
+      format: "zip",
       size: archive.length,
       entries: centralDirEntriesTotal,
       centralDirOffset,

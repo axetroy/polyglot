@@ -12,12 +12,12 @@ JPEG 前端格式适配器 — SOI/EOI 定位、段解析、布局查询。
 
 ```typescript
 import {
-  JpegAdapter,        // 标准 FrontAdapter 实现
-  jpegAdapter,        // 预实例化的单例
-  JpegSegment,        // 类型定义
-  JpegInfo,           // 类型定义
-  JpegLayout,         // 类型定义
-} from '@polyglot/formats-jpeg';
+  JpegAdapter, // 标准 FrontAdapter 实现
+  jpegAdapter, // 预实例化的单例
+  JpegSegment, // 类型定义
+  JpegInfo, // 类型定义
+  JpegLayout, // 类型定义
+} from "@polyglot/formats-jpeg";
 ```
 
 ## `JpegAdapter`
@@ -34,7 +34,7 @@ import {
 
 ```typescript
 interface JpegSegment {
-  marker: number;       // 如 0xFFC0 (SOF0)
+  marker: number; // 如 0xFFC0 (SOF0)
   length: number;
   payload: Buffer;
   offset: number;
@@ -44,7 +44,7 @@ interface JpegInfo {
   width: number;
   height: number;
   components: number;
-  size: number;         // 最终合法 JPEG 字节数（截断的 polyglot 文件会停在 EOI 处，而非 buffer 末尾）
+  size: number; // 最终合法 JPEG 字节数（截断的 polyglot 文件会停在 EOI 处，而非 buffer 末尾）
 }
 ```
 
@@ -56,7 +56,7 @@ interface JpegInfo {
 
 ```typescript
 interface JpegLayout {
-  format: 'jpeg';
+  format: "jpeg";
   size: number;
   width: number;
   height: number;

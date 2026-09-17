@@ -1,5 +1,5 @@
-import { crc32 } from './crc32.js';
-import { concatBytes, readU16LE, readU32LE, toAscii, writeU16LE, writeU32LE } from './bytes.js';
+import { crc32 } from "./crc32.js";
+import { concatBytes, readU16LE, readU32LE, toAscii, writeU16LE, writeU32LE } from "./bytes.js";
 
 export const ZIP_LOCAL_FILE_HEADER_SIG = 0x04034b50;
 export const ZIP_CENTRAL_DIR_SIG = 0x02014b50;
@@ -155,7 +155,7 @@ export function relocateZipOffsets(buffer: Uint8Array, adjustment: number): Uint
   if (adjustment <= 0) return buffer;
 
   const eocdOffset = findEocd(buffer);
-  if (eocdOffset === -1) throw new Error('Invalid ZIP: End of Central Directory not found');
+  if (eocdOffset === -1) throw new Error("Invalid ZIP: End of Central Directory not found");
 
   const centralDirOffset = readU32LE(buffer, eocdOffset + 16);
   const centralDirSize = readU32LE(buffer, eocdOffset + 12);
@@ -206,7 +206,7 @@ export function computeConcatOffset(buffer: Uint8Array, eocdOffset: number): num
 /** Read the central directory and return entry metadata in archive order. */
 export function listZipEntries(buffer: Uint8Array): ZipEntryMeta[] {
   const eocdOffset = findEocd(buffer);
-  if (eocdOffset === -1) throw new Error('Invalid ZIP: End of Central Directory not found');
+  if (eocdOffset === -1) throw new Error("Invalid ZIP: End of Central Directory not found");
 
   const concat = computeConcatOffset(buffer, eocdOffset);
   const entryCount = readU16LE(buffer, eocdOffset + 10);
@@ -245,10 +245,14 @@ export function listZipEntries(buffer: Uint8Array): ZipEntryMeta[] {
 
 /** Decompress a raw DEFLATE stream using the platform `DecompressionStream`. */
 async function inflateRaw(data: Uint8Array): Promise<Uint8Array> {
-  if (typeof DecompressionStream === 'undefined') {
-    throw new Error('DEFLATE entries require DecompressionStream, which this browser does not provide');
+  if (typeof DecompressionStream === "undefined") {
+    throw new Error(
+      "DEFLATE entries require DecompressionStream, which this browser does not provide"
+    );
   }
-  const stream = new Blob([data as BlobPart]).stream().pipeThrough(new DecompressionStream('deflate-raw'));
+  const stream = new Blob([data as BlobPart])
+    .stream()
+    .pipeThrough(new DecompressionStream("deflate-raw"));
   return new Uint8Array(await new Response(stream).arrayBuffer());
 }
 
@@ -277,7 +281,9 @@ export async function extractZipEntries(buffer: Uint8Array): Promise<ZipEntryInp
     } else if (meta.compressionMethod === METHOD_DEFLATE) {
       data = await inflateRaw(raw);
     } else {
-      throw new Error(`Unsupported compression method ${meta.compressionMethod} for "${meta.name}"`);
+      throw new Error(
+        `Unsupported compression method ${meta.compressionMethod} for "${meta.name}"`
+      );
     }
 
     out.push({ name: meta.name, data });

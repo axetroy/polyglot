@@ -40,9 +40,9 @@ The most critical piece of the implementation.
 
 ZIP carries two kinds of **absolute offsets**:
 
-| Location | Field | Meaning |
-| --- | --- | --- |
-| EOCD + 16 | central directory offset | Position of the CD relative to the file origin |
+| Location       | Field                    | Meaning                                                           |
+| -------------- | ------------------------ | ----------------------------------------------------------------- |
+| EOCD + 16      | central directory offset | Position of the CD relative to the file origin                    |
 | CD record + 42 | local file header offset | Position of each entry's local header relative to the file origin |
 
 All other fields (sizes, CRC, name lengths) are relative and stay unchanged.
@@ -77,10 +77,10 @@ Because this implementation stores **absolute** offsets, parsing the **whole fil
 
 Parsers split into roughly two classes:
 
-| Class | Behaviour | Examples |
-| --- | --- | --- |
+| Class                                                            | Behaviour         | Examples                                                                                   |
+| ---------------------------------------------------------------- | ----------------- | ------------------------------------------------------------------------------------------ |
 | Trust the recorded offsets (with the optional concat correction) | ✅ opens the file | `unzip` / `zipinfo`, Python `zipfile`, libarchive (`bsdtar`, macOS Archive Utility), 7-Zip |
-| Require `PK\x03\x04` at byte 0 | ❌ refuses | Apple `ditto` (and parts of Finder's extraction path), some strict GUI tools |
+| Require `PK\x03\x04` at byte 0                                   | ❌ refuses        | Apple `ditto` (and parts of Finder's extraction path), some strict GUI tools               |
 
 The second class is a **format-level mutual exclusion**: the PNG/JPEG signature must occupy byte 0, so ZIP cannot occupy byte 0 at the same time. Any consumer that insists on seeing ZIP at byte 0 can therefore never open an image-fronted polyglot file — that is an inherent boundary of this file shape, not an implementation defect. **Never make "every archiver can open it" a goal**; [Compatibility](/en/guide/compatibility) and `tests/compatibility/third-party.test.ts` pin the first class down with real tools.
 
@@ -88,11 +88,11 @@ The second class is a **format-level mutual exclusion**: the PNG/JPEG signature 
 
 The engine uses a **front × back** compatibility rule table to decide whether a pair is supported:
 
-| Front | Back | Supported | Mode |
-| --- | --- | --- | --- |
-| PNG | ZIP | ✅ | `relocated` |
-| JPEG | ZIP | ✅ | `relocated` |
-| any other pair | — | ❌ | `unsupported` |
+| Front          | Back | Supported | Mode          |
+| -------------- | ---- | --------- | ------------- |
+| PNG            | ZIP  | ✅        | `relocated`   |
+| JPEG           | ZIP  | ✅        | `relocated`   |
+| any other pair | —    | ❌        | `unsupported` |
 
 `relocated` means "implemented via offset relocation". Unregistered pairs are rejected with `unsupported`, and `create()` throws before producing a corrupted file.
 

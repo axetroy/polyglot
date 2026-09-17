@@ -24,21 +24,21 @@ interface BinarySource {
 
 内置三种实现：
 
-| 类 | 适用场景 | 是否惰性读取 |
-|---|---|---|
-| `PathSource` | 磁盘文件（大文件首选） | ✅ 按需 `fs` 读取 |
-| `BufferSource` | 已在内存中的数据 | ❌ 零拷贝切片 |
-| `StreamSource` | 网络流 / `Readable` | ⚠️ 首次读取时缓冲 |
+| 类             | 适用场景               | 是否惰性读取      |
+| -------------- | ---------------------- | ----------------- |
+| `PathSource`   | 磁盘文件（大文件首选） | ✅ 按需 `fs` 读取 |
+| `BufferSource` | 已在内存中的数据       | ❌ 零拷贝切片     |
+| `StreamSource` | 网络流 / `Readable`    | ⚠️ 首次读取时缓冲 |
 
 ```typescript
-import { PathSource, BufferSource, StreamSource, toSource, readAll } from '@polyglot/binary';
+import { PathSource, BufferSource, StreamSource, toSource, readAll } from "@polyglot/binary";
 
-const a = new PathSource('./image.png');
+const a = new PathSource("./image.png");
 const b = new BufferSource(buf);
 const c = new StreamSource(readableStream);
 
 // 智能归一：string → PathSource，Buffer → BufferSource，其余原样返回
-const src = toSource('./image.png');
+const src = toSource("./image.png");
 
 // 一次性读全部内容
 const all = await readAll(src);
@@ -49,21 +49,21 @@ const all = await readAll(src);
 游标式顺序读写，避免手工计算偏移：
 
 ```typescript
-import { BinaryReader, BinaryWriter } from '@polyglot/binary';
+import { BinaryReader, BinaryWriter } from "@polyglot/binary";
 
 const reader = new BinaryReader(source);
-await reader.readUInt32LE();  // 读 4 字节小端，游标自动前进
+await reader.readUInt32LE(); // 读 4 字节小端，游标自动前进
 await reader.readUInt16BE();
-reader.seek(128);             // 绝对定位
-reader.skip(4);               // 相对跳过
-reader.tell();                // 当前游标
-reader.position;              // 同上（getter）
+reader.seek(128); // 绝对定位
+reader.skip(4); // 相对跳过
+reader.tell(); // 当前游标
+reader.position; // 同上（getter）
 
 const writer = new BinaryWriter();
 writer.writeUInt32LE(0x04034b50);
 writer.writeBuffer(payload);
-writer.writeString('name');
-writer.writePaddingAligned(16);   // 对齐填充，返回填充字节数
+writer.writeString("name");
+writer.writePaddingAligned(16); // 对齐填充，返回填充字节数
 const out = writer.getBuffer();
 ```
 

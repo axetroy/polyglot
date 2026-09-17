@@ -1,9 +1,16 @@
-import { parsePng, isPng, validatePng, type PngInfo } from './png.js';
-import { parseJpeg, isJpeg, validateJpeg, type JpegInfo } from './jpeg.js';
-import { buildZip, relocateZipOffsets, listZipEntries, extractZipEntries, type ZipEntryInput, type ZipEntryMeta } from './zip.js';
-import { concatBytes } from './bytes.js';
+import { parsePng, isPng, validatePng, type PngInfo } from "./png.js";
+import { parseJpeg, isJpeg, validateJpeg, type JpegInfo } from "./jpeg.js";
+import {
+  buildZip,
+  relocateZipOffsets,
+  listZipEntries,
+  extractZipEntries,
+  type ZipEntryInput,
+  type ZipEntryMeta,
+} from "./zip.js";
+import { concatBytes } from "./bytes.js";
 
-export type FrontFormat = 'png' | 'jpeg';
+export type FrontFormat = "png" | "jpeg";
 
 /** Mirror of the Node-side security limits so the playground enforces the same caps. */
 export interface SecurityLimits {
@@ -39,27 +46,27 @@ export interface SynthesizeResult {
 export interface PolyglotInspection {
   isPolyglot: boolean;
   front?: { format: FrontFormat; size: number; width: number; height: number; valid: boolean };
-  back?: { format: 'zip'; entryCount: number; size: number; entries: ZipEntryMeta[] };
+  back?: { format: "zip"; entryCount: number; size: number; entries: ZipEntryMeta[] };
   error?: string;
 }
 
 export function detectFrontFormat(data: Uint8Array): FrontFormat | null {
-  if (isPng(data)) return 'png';
-  if (isJpeg(data)) return 'jpeg';
+  if (isPng(data)) return "png";
+  if (isJpeg(data)) return "jpeg";
   return null;
 }
 
 /** Parse a front image, returning both the typed info and the format tag. */
 export function parseFrontImage(
-  data: Uint8Array,
-): { format: 'png'; info: PngInfo } | { format: 'jpeg'; info: JpegInfo } {
-  if (isPng(data)) return { format: 'png', info: parsePng(data) };
+  data: Uint8Array
+): { format: "png"; info: PngInfo } | { format: "jpeg"; info: JpegInfo } {
+  if (isPng(data)) return { format: "png", info: parsePng(data) };
   if (isJpeg(data)) {
     const info = parseJpeg(data);
-    if (!info.valid) throw new Error('Invalid JPEG: missing EOI marker');
-    return { format: 'jpeg', info };
+    if (!info.valid) throw new Error("Invalid JPEG: missing EOI marker");
+    return { format: "jpeg", info };
   }
-  throw new Error('Unsupported front format: expected PNG or JPEG');
+  throw new Error("Unsupported front format: expected PNG or JPEG");
 }
 
 function enforceLimits(entries: ZipEntryInput[], limits: SecurityLimits): void {
@@ -89,12 +96,12 @@ export function synthesize(image: Uint8Array, options: SynthesizeOptions): Synth
   const { entries, limits: limitOverrides } = options;
   const limits = { ...DEFAULT_SECURITY_LIMITS, ...limitOverrides };
 
-  if (image.length === 0) throw new Error('Front image is empty');
-  if (entries.length === 0) throw new Error('At least one archive entry is required');
+  if (image.length === 0) throw new Error("Front image is empty");
+  if (entries.length === 0) throw new Error("At least one archive entry is required");
 
   const parsed = parseFrontImage(image);
-  const validation = parsed.format === 'png' ? validatePng(image) : validateJpeg(image);
-  if (!validation.valid) throw new Error(validation.error ?? 'Invalid front image');
+  const validation = parsed.format === "png" ? validatePng(image) : validateJpeg(image);
+  if (!validation.valid) throw new Error(validation.error ?? "Invalid front image");
 
   enforceLimits(entries, limits);
 
@@ -119,9 +126,9 @@ export function synthesize(image: Uint8Array, options: SynthesizeOptions): Synth
  * in the bytes that follow it.
  */
 export function inspect(data: Uint8Array): PolyglotInspection {
-  if (data.length === 0) return { isPolyglot: false, error: 'File is empty' };
+  if (data.length === 0) return { isPolyglot: false, error: "File is empty" };
 
-  let front: PolyglotInspection['front'];
+  let front: PolyglotInspection["front"];
   let frontSize = 0;
 
   try {
@@ -147,7 +154,7 @@ export function inspect(data: Uint8Array): PolyglotInspection {
       isPolyglot: entries.length > 0,
       front,
       back: {
-        format: 'zip',
+        format: "zip",
         entryCount: entries.length,
         size: data.length - frontSize,
         entries,
@@ -170,7 +177,7 @@ export async function extract(data: Uint8Array): Promise<ExtractResult> {
   const frontData = data.subarray(0, parsed.info.size);
 
   if (parsed.info.size >= data.length) {
-    throw new Error('Not a polyglot file: no archive data after the image');
+    throw new Error("Not a polyglot file: no archive data after the image");
   }
 
   const archiveView = data.subarray(parsed.info.size);
@@ -183,5 +190,5 @@ export async function extract(data: Uint8Array): Promise<ExtractResult> {
 }
 
 export { buildZip, relocateZipOffsets, listZipEntries, extractZipEntries, parsePng, parseJpeg };
-export { crc32 } from './crc32.js';
+export { crc32 } from "./crc32.js";
 export type { ZipEntryInput, ZipEntryMeta, PngInfo, JpegInfo };

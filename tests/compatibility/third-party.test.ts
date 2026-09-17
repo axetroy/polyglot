@@ -1,12 +1,12 @@
-import { describe, it, expect, beforeAll, afterAll } from 'vitest';
-import { mkdtempSync, rmSync, writeFileSync, readFileSync, mkdirSync, readdirSync } from 'fs';
-import { tmpdir } from 'os';
-import { join } from 'path';
-import { spawnSync } from 'child_process';
-import { deflateSync } from 'zlib';
-import { PolyglotEngine } from '@polyglot/core';
-import { pngAdapter } from '@polyglot/formats-png';
-import { zipAdapter } from '@polyglot/formats-zip';
+import { describe, it, expect, beforeAll, afterAll } from "vitest";
+import { mkdtempSync, rmSync, writeFileSync, readFileSync, mkdirSync, readdirSync } from "fs";
+import { tmpdir } from "os";
+import { join } from "path";
+import { spawnSync } from "child_process";
+import { deflateSync } from "zlib";
+import { PolyglotEngine } from "@polyglot/core";
+import { pngAdapter } from "@polyglot/formats-png";
+import { zipAdapter } from "@polyglot/formats-zip";
 
 /**
  * Third-party compatibility tests — the actual product claim.
@@ -27,7 +27,7 @@ import { zipAdapter } from '@polyglot/formats-zip';
 
 /** Probe a tool by actually running it — presence on PATH is not enough (`jar` is a stub without a JDK). */
 function toolOk(name: string, args: string[]): boolean {
-  const r = spawnSync(name, args, { stdio: 'ignore' });
+  const r = spawnSync(name, args, { stdio: "ignore" });
   return !r.error && r.status === 0;
 }
 
@@ -35,22 +35,30 @@ const PLATFORM = process.platform;
 
 // `unzip` on Windows isn't on PATH by default — CI installs it via choco when
 // available; otherwise the unzip tests skip, but 7-Zip and libarchive still run.
-const UNZIP = toolOk('unzip', ['-v']);
-const ZIPINFO = toolOk('zipinfo', ['-h']);
+const UNZIP = toolOk("unzip", ["-v"]);
+const ZIPINFO = toolOk("zipinfo", ["-h"]);
 // libarchive ships as `bsdtar` on macOS/Linux; Windows 10+ also ships a
 // libarchive build as `tar.exe` in System32. GNU tar on Linux cannot open ZIP
 // files, so we only fall back to `tar` on non-Linux platforms.
-const BSDTAR = toolOk('bsdtar', ['--version']) ? 'bsdtar' : PLATFORM !== 'linux' && toolOk('tar', ['--version']) ? 'tar' : null;
+const BSDTAR = toolOk("bsdtar", ["--version"])
+  ? "bsdtar"
+  : PLATFORM !== "linux" && toolOk("tar", ["--version"])
+    ? "tar"
+    : null;
 // `python3` is the convention on macOS/Linux; Windows GitHub runners expose `python` (and sometimes `python3` as a shim). Probe both.
-const PYTHON = toolOk('python3', ['--version']) ? 'python3' : toolOk('python', ['--version']) ? 'python' : null;
-const SEVENZIP = toolOk('7zz', ['i']) ? '7zz' : toolOk('7z', ['i']) ? '7z' : null;
+const PYTHON = toolOk("python3", ["--version"])
+  ? "python3"
+  : toolOk("python", ["--version"])
+    ? "python"
+    : null;
+const SEVENZIP = toolOk("7zz", ["i"]) ? "7zz" : toolOk("7z", ["i"]) ? "7z" : null;
 
 const ENTRIES = [
-  { name: 'hello.txt', data: Buffer.from('Hello from inside the image!\n') },
-  { name: 'sub/dir/note.md', data: Buffer.from('# nested\n') },
-  { name: '中文文档.txt', data: Buffer.from('中文内容\n') },
-  { name: 'empty.txt', data: Buffer.alloc(0) },
-  { name: 'binary.bin', data: Buffer.from([0, 1, 2, 3, 250, 251, 252, 253, 254, 255]) },
+  { name: "hello.txt", data: Buffer.from("Hello from inside the image!\n") },
+  { name: "sub/dir/note.md", data: Buffer.from("# nested\n") },
+  { name: "中文文档.txt", data: Buffer.from("中文内容\n") },
+  { name: "empty.txt", data: Buffer.alloc(0) },
+  { name: "binary.bin", data: Buffer.from([0, 1, 2, 3, 250, 251, 252, 253, 254, 255]) },
 ];
 
 function makePng(width = 512, height = 512, seed = 7): Buffer {
@@ -71,7 +79,7 @@ function makePng(width = 512, height = 512, seed = 7): Buffer {
   const chunk = (type: string, data: Buffer): Buffer => {
     const len = Buffer.alloc(4);
     len.writeUInt32BE(data.length);
-    const body = Buffer.concat([Buffer.from(type, 'ascii'), data]);
+    const body = Buffer.concat([Buffer.from(type, "ascii"), data]);
     return Buffer.concat([len, body, crc32(body)]);
   };
   const ihdr = Buffer.alloc(13);
@@ -93,7 +101,12 @@ function makePng(width = 512, height = 512, seed = 7): Buffer {
     }
   }
   for (let i = 0; i < raw.length; i += 97) raw[i] = ((raw[i] as number) * 31 + seed) & 0xff;
-  return Buffer.concat([sig, chunk('IHDR', ihdr), chunk('IDAT', deflateSync(raw)), chunk('IEND', Buffer.alloc(0))]);
+  return Buffer.concat([
+    sig,
+    chunk("IHDR", ihdr),
+    chunk("IDAT", deflateSync(raw)),
+    chunk("IEND", Buffer.alloc(0)),
+  ]);
 }
 
 let dir: string;
@@ -101,18 +114,18 @@ let streamPath: string;
 let imagePath: string;
 
 beforeAll(async () => {
-  dir = mkdtempSync(join(tmpdir(), 'polyglot-3p-'));
+  dir = mkdtempSync(join(tmpdir(), "polyglot-3p-"));
   const engine = new PolyglotEngine();
   engine.registerFront(pngAdapter);
   engine.registerBack(zipAdapter);
-  engine.registerCompatibility('png', 'zip', true, 'relocated');
+  engine.registerCompatibility("png", "zip", true, "relocated");
 
   const png = makePng();
-  imagePath = join(dir, 'front.png');
+  imagePath = join(dir, "front.png");
   writeFileSync(imagePath, png);
 
-  const file = await engine.create({ front: png, back: { format: 'zip', entries: ENTRIES } });
-  streamPath = join(dir, 'polyglot.png.zip');
+  const file = await engine.create({ front: png, back: { format: "zip", entries: ENTRIES } });
+  streamPath = join(dir, "polyglot.png.zip");
   writeFileSync(streamPath, file.getBuffer());
 });
 
@@ -128,7 +141,7 @@ function readExtracted(root: string, name: string): Buffer | null {
       if (item.isDirectory()) {
         const found = walk(full);
         if (found) return found;
-      } else if (item.name.normalize('NFC') === name.normalize('NFC')) {
+      } else if (item.name.normalize("NFC") === name.normalize("NFC")) {
         return full;
       }
     }
@@ -139,22 +152,22 @@ function readExtracted(root: string, name: string): Buffer | null {
 }
 
 function assertExtracted(root: string): void {
-  expect(readExtracted(root, 'hello.txt')).toEqual(Buffer.from('Hello from inside the image!\n'));
+  expect(readExtracted(root, "hello.txt")).toEqual(Buffer.from("Hello from inside the image!\n"));
   // note.md: some tools flatten or resolve the path differently; try both the
   // top-level name and the full nested path so the check survives platform quirks.
-  const noteMd =
-    readExtracted(root, 'note.md') ??
-    readExtracted(root, 'sub/dir/note.md');
-  expect(noteMd).toEqual(Buffer.from('# nested\n'));
+  const noteMd = readExtracted(root, "note.md") ?? readExtracted(root, "sub/dir/note.md");
+  expect(noteMd).toEqual(Buffer.from("# nested\n"));
   // Chinese filename: the ZIP stores it as UTF-8, but extraction tools on
   // non-UTF-8 locales (Windows cmd, some Linux terminals) may mangle the bytes.
   // Fall back to scanning the extracted tree by content so the test remains
   // meaningful everywhere.
-  const cnEntries = findByNameOrContent(root, '中文文档.txt', Buffer.from('中文内容\n'));
+  const cnEntries = findByNameOrContent(root, "中文文档.txt", Buffer.from("中文内容\n"));
   expect(cnEntries.length).toBeGreaterThan(0);
-  expect(readFileSync(cnEntries[0]!)).toEqual(Buffer.from('中文内容\n'));
-  expect(readExtracted(root, 'empty.txt')).toEqual(Buffer.alloc(0));
-  expect(readExtracted(root, 'binary.bin')).toEqual(Buffer.from([0, 1, 2, 3, 250, 251, 252, 253, 254, 255]));
+  expect(readFileSync(cnEntries[0]!)).toEqual(Buffer.from("中文内容\n"));
+  expect(readExtracted(root, "empty.txt")).toEqual(Buffer.alloc(0));
+  expect(readExtracted(root, "binary.bin")).toEqual(
+    Buffer.from([0, 1, 2, 3, 250, 251, 252, 253, 254, 255])
+  );
 }
 
 /** Look up an entry by name first; if missing, scan by content as a fallback. */
@@ -164,7 +177,7 @@ function findByNameOrContent(root: string, name: string, content: Buffer): strin
     for (const item of readdirSync(base, { withFileTypes: true })) {
       const full = join(base, item.name);
       if (item.isDirectory()) walk(full);
-      else if (item.name.normalize('NFC') === name.normalize('NFC')) byName.push(full);
+      else if (item.name.normalize("NFC") === name.normalize("NFC")) byName.push(full);
     }
   };
   walk(root);
@@ -182,8 +195,8 @@ function findByNameOrContent(root: string, name: string, content: Buffer): strin
   return byContent;
 }
 
-describe('file layout contract', () => {
-  it('records a central-directory offset that lands on the CD signature', () => {
+describe("file layout contract", () => {
+  it("records a central-directory offset that lands on the CD signature", () => {
     const buf = readFileSync(streamPath);
     let eocd = -1;
     for (let i = buf.length - 22; i >= 0; i--) {
@@ -200,10 +213,10 @@ describe('file layout contract', () => {
     const cdOffset = buf.readUInt32LE(eocd + 16);
     const cdSize = buf.readUInt32LE(eocd + 12);
     expect(eocd - cdSize - cdOffset).toBe(0);
-    expect(buf.subarray(cdOffset, cdOffset + 4).toString('hex')).toBe('504b0102');
+    expect(buf.subarray(cdOffset, cdOffset + 4).toString("hex")).toBe("504b0102");
   });
 
-  it('appends the archive once, with no padding bloat', async () => {
+  it("appends the archive once, with no padding bloat", async () => {
     const buf = readFileSync(streamPath);
     const pngSize = readFileSync(imagePath).length;
     const standalone = await zipAdapter.create(ENTRIES);
@@ -218,103 +231,105 @@ describe('file layout contract', () => {
   });
 });
 
-describe('Info-ZIP (unzip / zipinfo)', () => {
+describe("Info-ZIP (unzip / zipinfo)", () => {
   it.skipIf(!UNZIP)('unzip -t reports no errors and no "extra bytes" warning', () => {
-    const r = spawnSync('unzip', ['-t', streamPath], { encoding: 'utf8' });
+    const r = spawnSync("unzip", ["-t", streamPath], { encoding: "utf8" });
     expect(r.status).toBe(0);
-    const out = `${r.stdout ?? ''}\n${r.stderr ?? ''}`;
-    expect(out).toContain('No errors detected');
+    const out = `${r.stdout ?? ""}\n${r.stderr ?? ""}`;
+    expect(out).toContain("No errors detected");
     // This is the warning the pre-fix layout produced; it must stay gone.
-    expect(out).not.toContain('extra bytes');
+    expect(out).not.toContain("extra bytes");
   });
 
-  it.skipIf(!UNZIP)('unzip extracts every entry with identical bytes', () => {
-    const out = join(dir, 'x-unzip');
+  it.skipIf(!UNZIP)("unzip extracts every entry with identical bytes", () => {
+    const out = join(dir, "x-unzip");
     mkdirSync(out, { recursive: true });
-    const r = spawnSync('unzip', ['-qq', '-o', streamPath, '-d', out], { encoding: 'utf8' });
+    const r = spawnSync("unzip", ["-qq", "-o", streamPath, "-d", out], { encoding: "utf8" });
     expect(r.status).toBe(0);
     assertExtracted(out);
   });
 
-  it.skipIf(!ZIPINFO)('zipinfo -v parses the central directory without warnings', () => {
-    const r = spawnSync('zipinfo', ['-v', streamPath], { encoding: 'utf8' });
+  it.skipIf(!ZIPINFO)("zipinfo -v parses the central directory without warnings", () => {
+    const r = spawnSync("zipinfo", ["-v", streamPath], { encoding: "utf8" });
     expect(r.status).toBe(0);
-    expect(`${r.stdout ?? ''}${r.stderr ?? ''}`).not.toContain('extra bytes');
-    const names = spawnSync('zipinfo', ['-1', streamPath], { encoding: 'utf8' }).stdout ?? '';
-    expect(names).toContain('hello.txt');
-    expect(names).toContain('sub/dir/note.md');
+    expect(`${r.stdout ?? ""}${r.stderr ?? ""}`).not.toContain("extra bytes");
+    const names = spawnSync("zipinfo", ["-1", streamPath], { encoding: "utf8" }).stdout ?? "";
+    expect(names).toContain("hello.txt");
+    expect(names).toContain("sub/dir/note.md");
   });
 });
 
-describe('libarchive (bsdtar / tar)', () => {
-  it.skipIf(!BSDTAR)('bsdtar lists and extracts every entry', () => {
+describe("libarchive (bsdtar / tar)", () => {
+  it.skipIf(!BSDTAR)("bsdtar lists and extracts every entry", () => {
     const tool = BSDTAR as string;
-    const list = spawnSync(tool, ['-tf', streamPath], { encoding: 'utf8' });
+    const list = spawnSync(tool, ["-tf", streamPath], { encoding: "utf8" });
     expect(list.status).toBe(0);
-    const listed = (list.stdout ?? '').replace(/\\/g, '/');
-    expect(listed).toContain('hello.txt');
+    const listed = (list.stdout ?? "").replace(/\\/g, "/");
+    expect(listed).toContain("hello.txt");
     // Chinese filename listing is locale-dependent; verify it where possible but
     // do not fail the test on Windows/legacy terminals that cannot render it.
-    const hasUtf8Names = listed.includes('中文文档.txt') || list.stderr?.includes('中文文档.txt');
-    if (hasUtf8Names) expect(listed).toContain('中文文档.txt');
-    expect(listed).toContain('sub/dir/note.md');
+    const hasUtf8Names = listed.includes("中文文档.txt") || list.stderr?.includes("中文文档.txt");
+    if (hasUtf8Names) expect(listed).toContain("中文文档.txt");
+    expect(listed).toContain("sub/dir/note.md");
 
-    const out = join(dir, 'x-bsdtar');
+    const out = join(dir, "x-bsdtar");
     mkdirSync(out, { recursive: true });
-    const r = spawnSync(tool, ['-xf', streamPath, '-C', out], { encoding: 'utf8' });
+    const r = spawnSync(tool, ["-xf", streamPath, "-C", out], { encoding: "utf8" });
     expect(r.status).toBe(0);
     assertExtracted(out);
   });
 });
 
-describe('Python zipfile', () => {
-  it.skipIf(!PYTHON)('reads names, content and CRCs intact', () => {
+describe("Python zipfile", () => {
+  it.skipIf(!PYTHON)("reads names, content and CRCs intact", () => {
     const code = [
-      'import sys, zipfile',
-      'z = zipfile.ZipFile(sys.argv[1])',
-      'n = z.namelist()',
+      "import sys, zipfile",
+      "z = zipfile.ZipFile(sys.argv[1])",
+      "n = z.namelist()",
       "assert 'hello.txt' in n and 'sub/dir/note.md' in n and '中文文档.txt' in n, n",
       "assert z.read('hello.txt') == 'Hello from inside the image!\\n'.encode()",
       "assert z.read('中文文档.txt') == u'中文内容\\n'.encode('utf-8')",
       "assert z.read('binary.bin') == bytes([0,1,2,3,250,251,252,253,254,255])",
       "assert z.read('empty.txt') == b''",
-      'assert z.testzip() is None',
+      "assert z.testzip() is None",
       "print('PYOK')",
-    ].join('\n');
-    const r = spawnSync(PYTHON as string, ['-c', code, streamPath], { encoding: 'utf8' });
+    ].join("\n");
+    const r = spawnSync(PYTHON as string, ["-c", code, streamPath], { encoding: "utf8" });
     expect(r.status).toBe(0);
-    expect(`${r.stdout ?? ''}\n${r.stderr ?? ''}`).toContain('PYOK');
+    expect(`${r.stdout ?? ""}\n${r.stderr ?? ""}`).toContain("PYOK");
   });
 });
 
-describe('7-Zip', () => {
-  it.skipIf(!SEVENZIP)('lists and extracts every entry', () => {
+describe("7-Zip", () => {
+  it.skipIf(!SEVENZIP)("lists and extracts every entry", () => {
     const tool = SEVENZIP as string;
-    const list = spawnSync(tool, ['l', streamPath], { encoding: 'utf8' });
+    const list = spawnSync(tool, ["l", streamPath], { encoding: "utf8" });
     expect(list.status).toBe(0);
     // 7-Zip on Windows uses backslashes and \r\n line endings; normalise for
     // stable assertions across platforms.
-    const listed = (list.stdout ?? '').replace(/\\/g, '/');
-    expect(listed).toContain('hello.txt');
-    expect(listed).toContain('sub/dir/note.md');
+    const listed = (list.stdout ?? "").replace(/\\/g, "/");
+    expect(listed).toContain("hello.txt");
+    expect(listed).toContain("sub/dir/note.md");
     // 7-Zip recognises the image prefix as an SFX-style stub. The exact
     // wording varies by build/version (official `7zz` prints "Embedded Stub
     // Size = …", p7zip prints "The archive is open with offset"), so accept
     // either form. Exit-0 + byte-identical extraction is the hard requirement.
-    expect(`${list.stdout ?? ''}\n${list.stderr ?? ''}`).toMatch(/Embedded Stub Size|open with offset/i);
+    expect(`${list.stdout ?? ""}\n${list.stderr ?? ""}`).toMatch(
+      /Embedded Stub Size|open with offset/i
+    );
 
-    const out = join(dir, 'x-7z');
+    const out = join(dir, "x-7z");
     mkdirSync(out, { recursive: true });
-    const r = spawnSync(tool, ['x', '-y', `-o${out}`, streamPath], { encoding: 'utf8' });
+    const r = spawnSync(tool, ["x", "-y", `-o${out}`, streamPath], { encoding: "utf8" });
     expect(r.status).toBe(0);
     assertExtracted(out);
   });
 });
 
-describe('front format detection', () => {
-  it('the file still reads as a valid PNG image', () => {
+describe("front format detection", () => {
+  it("the file still reads as a valid PNG image", () => {
     const buf = readFileSync(streamPath);
-    expect(buf.subarray(0, 8).toString('hex')).toBe('89504e470d0a1a0a');
+    expect(buf.subarray(0, 8).toString("hex")).toBe("89504e470d0a1a0a");
     // IEND is the last PNG chunk, before the appended archive.
     expect(buf.subarray(0, readFileSync(imagePath).length)).toEqual(readFileSync(imagePath));
   });

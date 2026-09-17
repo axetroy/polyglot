@@ -1,8 +1,8 @@
-import type { BinarySource } from '@polyglot/binary';
-import { BufferSource, PathSource, readU32BE } from '@polyglot/binary';
+import type { BinarySource } from "@polyglot/binary";
+import { BufferSource, PathSource, readU32BE } from "@polyglot/binary";
 
 // PNG Signature: 89 50 4E 47 0D 0A 1A 0A
-const PNG_SIGNATURE = new Uint8Array([0x89, 0x50, 0x4E, 0x47, 0x0D, 0x0A, 0x1A, 0x0A]);
+const PNG_SIGNATURE = new Uint8Array([0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a]);
 
 export interface PngChunk {
   type: string;
@@ -24,7 +24,7 @@ export interface PngInfo {
 }
 
 export interface PngLayout {
-  format: 'png';
+  format: "png";
   size: number;
   width: number;
   height: number;
@@ -33,7 +33,7 @@ export interface PngLayout {
 }
 
 export class PngAdapter {
-  readonly id = 'png';
+  readonly id = "png";
 
   async detect(source: BinarySource): Promise<boolean> {
     const header = await source.read(0, 8);
@@ -48,19 +48,19 @@ export class PngAdapter {
   async validate(source: BinarySource): Promise<{ valid: boolean; error?: string }> {
     try {
       const info = await this.inspect(source);
-      const hasIend = info.chunks.some((c) => c.type === 'IEND');
+      const hasIend = info.chunks.some((c) => c.type === "IEND");
       if (!hasIend) {
-        return { valid: false, error: 'Missing IEND chunk' };
+        return { valid: false, error: "Missing IEND chunk" };
       }
       return { valid: true };
     } catch (err) {
-      return { valid: false, error: err instanceof Error ? err.message : 'Unknown error' };
+      return { valid: false, error: err instanceof Error ? err.message : "Unknown error" };
     }
   }
 
   async getLayout(info: PngInfo): Promise<PngLayout> {
     return {
-      format: 'png',
+      format: "png",
       size: info.size,
       width: info.width,
       height: info.height,
@@ -71,7 +71,7 @@ export class PngAdapter {
 
   parsePng(buffer: Uint8Array): PngInfo {
     if (buffer.length < 8 || !equalsBytes(buffer.subarray(0, 8), PNG_SIGNATURE)) {
-      throw new Error('Not a valid PNG file');
+      throw new Error("Not a valid PNG file");
     }
 
     const chunks: PngChunk[] = [];
@@ -79,7 +79,7 @@ export class PngAdapter {
 
     while (offset < buffer.length) {
       if (offset + 8 > buffer.length) {
-        throw new Error('PNG truncated: not enough data for chunk header');
+        throw new Error("PNG truncated: not enough data for chunk header");
       }
 
       const length = readU32BE(buffer, offset);
@@ -95,13 +95,13 @@ export class PngAdapter {
 
       offset += 12 + length;
 
-      if (type === 'IEND') break;
+      if (type === "IEND") break;
     }
 
     // Parse IHDR
-    const ihdr = chunks.find((c) => c.type === 'IHDR');
+    const ihdr = chunks.find((c) => c.type === "IHDR");
     if (!ihdr) {
-      throw new Error('PNG missing IHDR chunk');
+      throw new Error("PNG missing IHDR chunk");
     }
 
     const width = readU32BE(ihdr.data, 0);
@@ -149,7 +149,7 @@ function equalsBytes(a: Uint8Array, b: Uint8Array): boolean {
 }
 
 function toAscii(buf: Uint8Array): string {
-  let out = '';
+  let out = "";
   for (let i = 0; i < buf.length; i++) out += String.fromCharCode(buf[i]!);
   return out;
 }

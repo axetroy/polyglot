@@ -25,21 +25,21 @@ npm install -g @polyglot/cli
 ### In code
 
 ```typescript
-import { polyglot } from '@polyglot/sdk';
+import { polyglot } from "@polyglot/sdk";
 
 // Build: embed a ZIP archive inside a PNG image
 const file = await polyglot.create({
-  front: './photo.png',
+  front: "./photo.png",
   back: {
-    format: 'zip',
+    format: "zip",
     entries: [
-      { name: 'readme.txt', data: Buffer.from('Hello, world') },
-      { name: 'secret.json', data: Buffer.from('{"key":"value"}') },
+      { name: "readme.txt", data: Buffer.from("Hello, world") },
+      { name: "secret.json", data: Buffer.from('{"key":"value"}') },
     ],
   },
 });
 
-await file.write('output.png');
+await file.write("output.png");
 ```
 
 The generated `output.png` opens normally in any image viewer, and `unzip output.png` extracts both files.
@@ -47,31 +47,31 @@ The generated `output.png` opens normally in any image viewer, and `unzip output
 ### Inspect a file
 
 ```typescript
-const info = await polyglot.inspect('output.png');
+const info = await polyglot.inspect("output.png");
 
 if (info.polyglot) {
-  console.log('front:', info.front?.format, info.front?.size, 'bytes');
-  console.log('back:', info.back?.format, info.back?.entries, 'entries');
+  console.log("front:", info.front?.format, info.front?.size, "bytes");
+  console.log("back:", info.back?.format, info.back?.entries, "entries");
 }
 ```
 
 ### Extract the archive
 
 ```typescript
-const back = await polyglot.openBack('output.png');
+const back = await polyglot.openBack("output.png");
 const names = await back.list();
 // ['readme.txt', 'secret.json']
 
-const content = await back.read('readme.txt');
+const content = await back.read("readme.txt");
 console.log(content.toString()); // Hello, world
 ```
 
 ### Read only the image
 
 ```typescript
-const front = await polyglot.openFront('output.png');
+const front = await polyglot.openFront("output.png");
 console.log(front.format); // 'png'
-console.log(front.size);   // bytes of the image portion only
+console.log(front.size); // bytes of the image portion only
 
 for await (const chunk of front.stream()) {
   // stream the clean image data (archive excluded)

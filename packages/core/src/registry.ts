@@ -1,4 +1,4 @@
-import type { FrontAdapter, BackAdapter, CompatibilityRule } from './types.js';
+import type { FrontAdapter, BackAdapter, CompatibilityRule } from "./types.js";
 
 export class FormatRegistry {
   private readonly fronts = new Map<string, FrontAdapter>();

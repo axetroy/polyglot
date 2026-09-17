@@ -1,8 +1,8 @@
-import type { BinarySource } from '@polyglot/binary';
-import { BufferSource, PathSource, readU16BE } from '@polyglot/binary';
+import type { BinarySource } from "@polyglot/binary";
+import { BufferSource, PathSource, readU16BE } from "@polyglot/binary";
 
 // JPEG SOI: FF D8
-const JPEG_SOI = new Uint8Array([0xFF, 0xD8]);
+const JPEG_SOI = new Uint8Array([0xff, 0xd8]);
 
 export interface JpegSegment {
   marker: number;
@@ -21,7 +21,7 @@ export interface JpegInfo {
 }
 
 export interface JpegLayout {
-  format: 'jpeg';
+  format: "jpeg";
   size: number;
   width?: number;
   height?: number;
@@ -29,12 +29,11 @@ export interface JpegLayout {
 }
 
 const SOF_MARKERS = new Set([
-  0xC0, 0xC1, 0xC2, 0xC3, 0xC5, 0xC6, 0xC7,
-  0xC9, 0xCA, 0xCB, 0xCD, 0xCE, 0xCF,
+  0xc0, 0xc1, 0xc2, 0xc3, 0xc5, 0xc6, 0xc7, 0xc9, 0xca, 0xcb, 0xcd, 0xce, 0xcf,
 ]);
 
 export class JpegAdapter {
-  readonly id = 'jpeg';
+  readonly id = "jpeg";
 
   async detect(source: BinarySource): Promise<boolean> {
     const header = await source.read(0, 2);
@@ -49,19 +48,19 @@ export class JpegAdapter {
   async validate(source: BinarySource): Promise<{ valid: boolean; error?: string }> {
     try {
       const info = await this.inspect(source);
-      const hasEoi = info.segments.some((s) => s.marker === 0xD9);
+      const hasEoi = info.segments.some((s) => s.marker === 0xd9);
       if (!hasEoi) {
-        return { valid: false, error: 'Missing EOI marker' };
+        return { valid: false, error: "Missing EOI marker" };
       }
       return { valid: true };
     } catch (err) {
-      return { valid: false, error: err instanceof Error ? err.message : 'Unknown error' };
+      return { valid: false, error: err instanceof Error ? err.message : "Unknown error" };
     }
   }
 
   async getLayout(info: JpegInfo): Promise<JpegLayout> {
     return {
-      format: 'jpeg',
+      format: "jpeg",
       size: info.size,
       width: info.width,
       height: info.height,
@@ -71,7 +70,7 @@ export class JpegAdapter {
 
   parseJpeg(buffer: Uint8Array): JpegInfo {
     if (buffer.length < 2 || !equalsBytes(buffer.subarray(0, 2), JPEG_SOI)) {
-      throw new Error('Not a valid JPEG file');
+      throw new Error("Not a valid JPEG file");
     }
 
     const segments: JpegSegment[] = [];
@@ -79,7 +78,7 @@ export class JpegAdapter {
 
     while (offset < buffer.length) {
       // Find marker
-      while (offset < buffer.length && buffer[offset] === 0xFF) {
+      while (offset < buffer.length && buffer[offset] === 0xff) {
         offset++;
       }
       if (offset >= buffer.length) break;
@@ -95,14 +94,14 @@ export class JpegAdapter {
       const segOffset = offset - 2; // include the 0xFF
 
       // Markers without payload
-      if (marker === 0xD9 || marker === 0xD8 || (marker >= 0xD0 && marker <= 0xD7)) {
+      if (marker === 0xd9 || marker === 0xd8 || (marker >= 0xd0 && marker <= 0xd7)) {
         segments.push({ marker, length: 0, data: new Uint8Array(0), offset: segOffset });
-        if (marker === 0xD9) break; // EOI
+        if (marker === 0xd9) break; // EOI
         continue;
       }
 
       if (offset + 2 > buffer.length) {
-        throw new Error('JPEG truncated: not enough data for segment length');
+        throw new Error("JPEG truncated: not enough data for segment length");
       }
 
       const length = readU16BE(buffer, offset);
@@ -117,7 +116,7 @@ export class JpegAdapter {
       segments.push({ marker, length, data, offset: segOffset });
       offset += length - 2;
 
-      if (marker === 0xD9) break; // EOI
+      if (marker === 0xd9) break; // EOI
     }
 
     // Extract dimensions from SOF marker

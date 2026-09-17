@@ -26,21 +26,21 @@ npm install -g @polyglot/cli
 ### 在代码中使用
 
 ```typescript
-import { polyglot } from '@polyglot/sdk';
+import { polyglot } from "@polyglot/sdk";
 
 // 合成：把 ZIP 归档藏进 PNG 图片
 const file = await polyglot.create({
-  front: './photo.png',
+  front: "./photo.png",
   back: {
-    format: 'zip',
+    format: "zip",
     entries: [
-      { name: 'readme.txt', data: Buffer.from('你好，世界') },
-      { name: 'secret.json', data: Buffer.from('{"key":"value"}') },
+      { name: "readme.txt", data: Buffer.from("你好，世界") },
+      { name: "secret.json", data: Buffer.from('{"key":"value"}') },
     ],
   },
 });
 
-await file.write('output.png');
+await file.write("output.png");
 ```
 
 生成的 `output.png` 用任何图片查看器打开都是正常图片，用 `unzip output.png` 也能解压出两个文件。
@@ -48,31 +48,31 @@ await file.write('output.png');
 ### 检查文件
 
 ```typescript
-const info = await polyglot.inspect('output.png');
+const info = await polyglot.inspect("output.png");
 
 if (info.polyglot) {
-  console.log('前端:', info.front?.format, info.front?.size, '字节');
-  console.log('后端:', info.back?.format, info.back?.entries, '个条目');
+  console.log("前端:", info.front?.format, info.front?.size, "字节");
+  console.log("后端:", info.back?.format, info.back?.entries, "个条目");
 }
 ```
 
 ### 提取内容
 
 ```typescript
-const back = await polyglot.openBack('output.png');
+const back = await polyglot.openBack("output.png");
 const names = await back.list();
 // ['readme.txt', 'secret.json']
 
-const content = await back.read('readme.txt');
+const content = await back.read("readme.txt");
 console.log(content.toString()); // 你好，世界
 ```
 
 ### 只取出图片
 
 ```typescript
-const front = await polyglot.openFront('output.png');
+const front = await polyglot.openFront("output.png");
 console.log(front.format); // 'png'
-console.log(front.size);   // 图片部分的字节长度
+console.log(front.size); // 图片部分的字节长度
 
 for await (const chunk of front.stream()) {
   // 流式读取纯净的图片数据（不含归档）

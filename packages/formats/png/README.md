@@ -12,12 +12,12 @@ PNG 前端格式适配器 — 检测、解析、校验与布局查询。
 
 ```typescript
 import {
-  PngAdapter,        // 标准 FrontAdapter 实现
-  pngAdapter,        // 预实例化的单例
-  PngChunk,          // 类型定义
-  PngInfo,           // 类型定义
-  PngLayout,         // 类型定义
-} from '@polyglot/formats-png';
+  PngAdapter, // 标准 FrontAdapter 实现
+  pngAdapter, // 预实例化的单例
+  PngChunk, // 类型定义
+  PngInfo, // 类型定义
+  PngLayout, // 类型定义
+} from "@polyglot/formats-png";
 ```
 
 ## `PngAdapter`
@@ -37,12 +37,12 @@ interface PngInfo {
   width: number;
   height: number;
   bitDepth: number;
-  colorType: number;   // 0=灰度 2=RGB 3=索引 4=灰度+alpha 6=RGBA
+  colorType: number; // 0=灰度 2=RGB 3=索引 4=灰度+alpha 6=RGBA
   compressionMethod: number;
   filterMethod: number;
   interlaceMethod: number;
   chunks: PngChunk[];
-  size: number;        // 最终合法 PNG 字节数（截断的 polyglot 文件会停在有效 chunk 边界）
+  size: number; // 最终合法 PNG 字节数（截断的 polyglot 文件会停在有效 chunk 边界）
 }
 ```
 
@@ -52,7 +52,7 @@ interface PngInfo {
 
 ```typescript
 const v = await adapter.validate(source);
-if (!v.valid) throw new InvalidFrontError(v.error, 'png');
+if (!v.valid) throw new InvalidFrontError(v.error, "png");
 ```
 
 ### `getLayout(info)` → `Promise<PngLayout>`
@@ -61,7 +61,7 @@ if (!v.valid) throw new InvalidFrontError(v.error, 'png');
 
 ```typescript
 interface PngLayout {
-  format: 'png';
+  format: "png";
   size: number;
   width: number;
   height: number;

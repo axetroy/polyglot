@@ -1,4 +1,4 @@
-import { equalsBytes, readU32BE, toAscii } from './bytes.js';
+import { equalsBytes, readU32BE, toAscii } from "./bytes.js";
 
 export const PNG_SIGNATURE = new Uint8Array([0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a]);
 
@@ -9,7 +9,7 @@ export interface PngChunk {
 }
 
 export interface PngInfo {
-  format: 'png';
+  format: "png";
   width: number;
   height: number;
   bitDepth: number;
@@ -31,7 +31,7 @@ export function isPng(data: Uint8Array): boolean {
  * appended ZIP archive lives exactly there.
  */
 export function parsePng(data: Uint8Array): PngInfo {
-  if (!isPng(data)) throw new Error('Not a valid PNG: signature mismatch');
+  if (!isPng(data)) throw new Error("Not a valid PNG: signature mismatch");
 
   let offset = 8;
   let width = 0;
@@ -50,7 +50,7 @@ export function parsePng(data: Uint8Array): PngInfo {
     // A truncated chunk means IEND was never reached: stop and report invalid.
     if (offset + length + 4 > data.length) break;
 
-    if (type === 'IHDR' && length >= 13) {
+    if (type === "IHDR" && length >= 13) {
       width = readU32BE(data, offset);
       height = readU32BE(data, offset + 4);
       bitDepth = data[offset + 8]!;
@@ -60,16 +60,16 @@ export function parsePng(data: Uint8Array): PngInfo {
     chunks.push({ type, length, offset: chunkStart });
     offset += length + 4; // skip payload + CRC
 
-    if (type === 'IEND') {
+    if (type === "IEND") {
       sawIend = true;
       break;
     }
   }
 
-  if (!sawIend) throw new Error('Invalid PNG: missing IEND chunk');
+  if (!sawIend) throw new Error("Invalid PNG: missing IEND chunk");
 
   return {
-    format: 'png',
+    format: "png",
     width,
     height,
     bitDepth,
@@ -85,6 +85,6 @@ export function validatePng(data: Uint8Array): { valid: boolean; error?: string 
     parsePng(data);
     return { valid: true };
   } catch (err) {
-    return { valid: false, error: err instanceof Error ? err.message : 'Unknown error' };
+    return { valid: false, error: err instanceof Error ? err.message : "Unknown error" };
   }
 }

@@ -1,13 +1,13 @@
 import {
-  readU16LE, readU32LE,
-  writeU16LE, writeU32LE,
-  alloc, concat, fromString,
-} from '@polyglot/binary';
-import {
-  ZIP_CENTRAL_DIR_SIG,
-  ZIP_EOCD_SIG,
-  ZIP_LOCAL_FILE_HEADER_SIG,
-} from './constants.js';
+  readU16LE,
+  readU32LE,
+  writeU16LE,
+  writeU32LE,
+  alloc,
+  concat,
+  fromString,
+} from "@polyglot/binary";
+import { ZIP_CENTRAL_DIR_SIG, ZIP_EOCD_SIG, ZIP_LOCAL_FILE_HEADER_SIG } from "./constants.js";
 
 export interface ZipEntryData {
   name: string;
@@ -178,7 +178,7 @@ export function relocateZipOffsets(buffer: Uint8Array, adjustment: number): Uint
   }
 
   if (eocdOffset === -1) {
-    throw new Error('Invalid ZIP: End of Central Directory not found');
+    throw new Error("Invalid ZIP: End of Central Directory not found");
   }
 
   const centralDirOffset = readU32LE(buffer, eocdOffset + 16);

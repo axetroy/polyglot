@@ -1,5 +1,5 @@
-import { describe, it, expect } from 'vitest';
-import { buildZip, relocateZipOffsets, parseZip } from '@polyglot/formats-zip';
+import { describe, it, expect } from "vitest";
+import { buildZip, relocateZipOffsets, parseZip } from "@polyglot/formats-zip";
 
 function makeSource(buf: Uint8Array) {
   return {
@@ -8,51 +8,49 @@ function makeSource(buf: Uint8Array) {
   };
 }
 
-describe('ZIP Security', () => {
-  it('should reject ZIP with too many entries (maxEntries)', async () => {
+describe("ZIP Security", () => {
+  it("should reject ZIP with too many entries (maxEntries)", async () => {
     const entries = Array.from({ length: 10001 }, (_, i) => ({
       name: `file${i}.txt`,
-      data: Buffer.from('x'),
+      data: Buffer.from("x"),
     }));
     const zip = buildZip(entries);
-    await expect(parseZip(makeSource(zip), { maxEntries: 10000 }))
-      .rejects
-      .toThrow(/exceeds maximum entry limit/);
+    await expect(parseZip(makeSource(zip), { maxEntries: 10000 })).rejects.toThrow(
+      /exceeds maximum entry limit/
+    );
   });
 
-  it('should reject ZIP with oversized entry (maxEntrySize)', async () => {
+  it("should reject ZIP with oversized entry (maxEntrySize)", async () => {
     const hugeData = Buffer.alloc(1024 * 1024 * 2); // 2 MB
-    const zip = buildZip([{ name: 'big.txt', data: hugeData }]);
-    await expect(parseZip(makeSource(zip), { maxEntrySize: 1024 * 1024 }))
-      .rejects
-      .toThrow(/exceeds maximum size/);
+    const zip = buildZip([{ name: "big.txt", data: hugeData }]);
+    await expect(parseZip(makeSource(zip), { maxEntrySize: 1024 * 1024 })).rejects.toThrow(
+      /exceeds maximum size/
+    );
   });
 
-  it('should reject ZIP with path traversal entries', async () => {
-    const zip = buildZip([
-      { name: 'evil/../../../etc/passwd', data: Buffer.from('pwned') },
-    ]);
-    await expect(parseZip(makeSource(zip), { sanitizePaths: true }))
-      .rejects
-      .toThrow(/Path traversal/);
+  it("should reject ZIP with path traversal entries", async () => {
+    const zip = buildZip([{ name: "evil/../../../etc/passwd", data: Buffer.from("pwned") }]);
+    await expect(parseZip(makeSource(zip), { sanitizePaths: true })).rejects.toThrow(
+      /Path traversal/
+    );
   });
 
-  it('should accept valid ZIP within limits', async () => {
+  it("should accept valid ZIP within limits", async () => {
     const zip = buildZip([
-      { name: 'a.txt', data: Buffer.from('hello') },
-      { name: 'b.txt', data: Buffer.from('world') },
+      { name: "a.txt", data: Buffer.from("hello") },
+      { name: "b.txt", data: Buffer.from("world") },
     ]);
     const result = await parseZip(makeSource(zip), {
       maxEntries: 10000,
       maxEntrySize: 1024 * 1024,
     });
     expect(result.entries).toHaveLength(2);
-    expect(result.entries[0].name).toBe('a.txt');
+    expect(result.entries[0].name).toBe("a.txt");
   });
 
-  it('should handle polyglot file correctly (PNG+ZIP)', async () => {
+  it("should handle polyglot file correctly (PNG+ZIP)", async () => {
     // Create minimal PNG
-    const sig = Buffer.from([0x89, 0x50, 0x4E, 0x47, 0x0D, 0x0A, 0x1A, 0x0A]);
+    const sig = Buffer.from([0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a]);
     const ihdrData = Buffer.alloc(13);
     ihdrData.writeUInt32BE(1, 0);
     ihdrData.writeUInt32BE(1, 4);
@@ -61,23 +59,23 @@ describe('ZIP Security', () => {
     ihdrData.writeUInt8(0, 10);
     ihdrData.writeUInt8(0, 11);
     ihdrData.writeUInt8(0, 12);
-    const ihdr = createChunk('IHDR', ihdrData);
-    const idat = createChunk('IDAT', Buffer.from([0, 255, 0, 0]));
-    const iend = createChunk('IEND', Buffer.alloc(0));
+    const ihdr = createChunk("IHDR", ihdrData);
+    const idat = createChunk("IDAT", Buffer.from([0, 255, 0, 0]));
+    const iend = createChunk("IEND", Buffer.alloc(0));
     const png = Buffer.concat([sig, ihdr, idat, iend]);
 
-    const zip = buildZip([{ name: 'test.txt', data: Buffer.from('test') }]);
+    const zip = buildZip([{ name: "test.txt", data: Buffer.from("test") }]);
     const relocated = relocateZipOffsets(zip, png.length);
     const polyglot = Buffer.concat([png, relocated]);
 
     const result = await parseZip(makeSource(polyglot.slice(png.length)));
     expect(result.entries).toHaveLength(1);
-    expect(result.entries[0].name).toBe('test.txt');
+    expect(result.entries[0].name).toBe("test.txt");
   });
 });
 
 function createChunk(type: string, data: Buffer): Buffer {
-  const typeBuf = Buffer.from(type, 'ascii');
+  const typeBuf = Buffer.from(type, "ascii");
   const crc = computeCrc32(Buffer.concat([typeBuf, data]));
   const header = Buffer.alloc(8);
   header.writeUInt32BE(data.length, 0);

@@ -1,13 +1,13 @@
-import { PathSource, type BinarySource } from '@polyglot/binary';
-import { FormatRegistry } from './registry.js';
-import { Detector } from './detector.js';
+import { PathSource, type BinarySource } from "@polyglot/binary";
+import { FormatRegistry } from "./registry.js";
+import { Detector } from "./detector.js";
 import {
   UnsupportedFormatError,
   IncompatibleFormatError,
   InvalidFrontError,
   InvalidArchiveError,
   RelocationError,
-} from './errors.js';
+} from "./errors.js";
 import type {
   CreateOptions,
   PolyglotFile,
@@ -15,17 +15,17 @@ import type {
   DetectionResult,
   OpenFrontResult,
   OpenBackResult,
-} from './types.js';
+} from "./types.js";
 
 class DefaultPolyglotFile implements PolyglotFile {
   constructor(
     private readonly buffer: Uint8Array,
-    private readonly info: PolyglotInfo,
+    private readonly info: PolyglotInfo
   ) {}
 
   async write(path: string): Promise<void> {
-    const fs = await import('fs/promises');
-    const fileHandle = await fs.open(path, 'w');
+    const fs = await import("fs/promises");
+    const fileHandle = await fs.open(path, "w");
     try {
       // Node's fd.write accepts Uint8Array natively (same as Buffer)
       await fileHandle.write(this.buffer as unknown as Buffer, 0, this.buffer.length, 0);
@@ -44,14 +44,15 @@ class DefaultPolyglotFile implements PolyglotFile {
 }
 
 function toBinarySource(data: string | Uint8Array | BinarySource): BinarySource {
-  if (typeof data === 'string') {
+  if (typeof data === "string") {
     return new PathSource(data);
   }
   // Buffer is a Uint8Array subclass — accept both transparently.
   if (data instanceof Uint8Array) {
     return {
       size: () => Promise.resolve(data.length),
-      read: (offset: number, length: number) => Promise.resolve(data.subarray(offset, offset + length)),
+      read: (offset: number, length: number) =>
+        Promise.resolve(data.subarray(offset, offset + length)),
     };
   }
   return data;
@@ -66,15 +67,20 @@ export class PolyglotEngine {
     this.detector = new Detector(this.registry);
   }
 
-  registerFront(adapter: import('@polyglot/binary').FrontAdapter & { id: string }): void {
+  registerFront(adapter: import("@polyglot/binary").FrontAdapter & { id: string }): void {
     this.registry.registerFront(adapter);
   }
 
-  registerBack(adapter: import('@polyglot/binary').BackAdapter & { id: string }): void {
+  registerBack(adapter: import("@polyglot/binary").BackAdapter & { id: string }): void {
     this.registry.registerBack(adapter);
   }
 
-  registerCompatibility(front: string, back: string, supported: boolean, mode: 'native' | 'relocated' | 'experimental' | 'unsupported' = 'unsupported'): void {
+  registerCompatibility(
+    front: string,
+    back: string,
+    supported: boolean,
+    mode: "native" | "relocated" | "experimental" | "unsupported" = "unsupported"
+  ): void {
     this.registry.registerCompatibility({ front, back, supported, mode });
   }
 
@@ -83,7 +89,7 @@ export class PolyglotEngine {
 
     const frontAdapter = await this.findFrontAdapter(frontSource);
     if (!frontAdapter) {
-      throw new UnsupportedFormatError('Unsupported front format');
+      throw new UnsupportedFormatError("Unsupported front format");
     }
 
     const backAdapter = this.registry.getBack(options.back.format);
@@ -92,9 +98,9 @@ export class PolyglotEngine {
     }
 
     const rule = this.registry.getCompatibility(frontAdapter.id, options.back.format);
-    if (!rule?.supported && rule?.mode !== 'experimental') {
+    if (!rule?.supported && rule?.mode !== "experimental") {
       throw new IncompatibleFormatError(
-        `Format combination ${frontAdapter.id} + ${options.back.format} is not supported`,
+        `Format combination ${frontAdapter.id} + ${options.back.format} is not supported`
       );
     }
 
@@ -118,9 +124,9 @@ export class PolyglotEngine {
       await backAdapter.parse(backAdapter.toSource(relocatedBack));
     } catch (err) {
       throw new RelocationError(
-        `Failed to relocate back archive: ${err instanceof Error ? err.message : 'unknown error'}`,
+        `Failed to relocate back archive: ${err instanceof Error ? err.message : "unknown error"}`,
         options.back.format,
-        frontSize,
+        frontSize
       );
     }
 
@@ -160,7 +166,7 @@ export class PolyglotEngine {
 
     const info = await this.detector.inspect(src);
     if (!info.polyglot || !info.front) {
-      throw new InvalidFrontError('Not a polyglot file or front format not detected', 'unknown');
+      throw new InvalidFrontError("Not a polyglot file or front format not detected", "unknown");
     }
 
     const adapter = this.registry.getFront(info.front.format);
@@ -186,7 +192,7 @@ export class PolyglotEngine {
 
     const info = await this.detector.inspect(src);
     if (!info.polyglot || !info.back) {
-      throw new InvalidArchiveError('Not a polyglot file or back format not detected', 'unknown');
+      throw new InvalidArchiveError("Not a polyglot file or back format not detected", "unknown");
     }
 
     const adapter = this.registry.getBack(info.back.format);
@@ -226,7 +232,9 @@ export class PolyglotEngine {
     };
   }
 
-  private async findFrontAdapter(source: BinarySource): Promise<import('@polyglot/binary').FrontAdapter | null> {
+  private async findFrontAdapter(
+    source: BinarySource
+  ): Promise<import("@polyglot/binary").FrontAdapter | null> {
     for (const adapter of this.registry.getAllFronts()) {
       if (await adapter.detect(source)) {
         return adapter;

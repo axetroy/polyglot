@@ -1,12 +1,5 @@
-import {
-  readU16LE, readU32LE,
-  toString,
-} from '@polyglot/binary';
-import {
-  ZIP_CENTRAL_DIR_SIG,
-  ZIP_EOCD_SIG,
-  ZIP_LOCAL_FILE_HEADER_SIG,
-} from './constants.js';
+import { readU16LE, readU32LE, toString } from "@polyglot/binary";
+import { ZIP_CENTRAL_DIR_SIG, ZIP_EOCD_SIG, ZIP_LOCAL_FILE_HEADER_SIG } from "./constants.js";
 
 export interface ZipLocalHeader {
   signature: number;
@@ -94,7 +87,7 @@ const DEFAULT_MAX_TOTAL_SIZE = 10 * 1024 * 1024 * 1024; // 10 GB
 
 export async function parseZip(
   source: { read(offset: number, length: number): Promise<Uint8Array>; size(): Promise<number> },
-  options: ZipParseOptions = {},
+  options: ZipParseOptions = {}
 ): Promise<ZipArchive> {
   const maxEntries = options.maxEntries ?? DEFAULT_MAX_ENTRIES;
   const maxEntrySize = options.maxEntrySize ?? DEFAULT_MAX_ENTRY_SIZE;
@@ -107,7 +100,7 @@ export async function parseZip(
   // Find EOCD
   const eocdOffset = findEocd(buffer);
   if (eocdOffset === -1) {
-    throw new Error('Invalid ZIP: End of Central Directory not found');
+    throw new Error("Invalid ZIP: End of Central Directory not found");
   }
 
   const eocd = parseEocd(buffer, eocdOffset);
@@ -132,7 +125,7 @@ export async function parseZip(
     // Security: check entry count
     if (centralDirEntries.length >= maxEntries) {
       throw new Error(
-        `ZIP archive exceeds maximum entry limit: ${centralDirEntries.length} >= ${maxEntries}`,
+        `ZIP archive exceeds maximum entry limit: ${centralDirEntries.length} >= ${maxEntries}`
       );
     }
 
@@ -143,7 +136,7 @@ export async function parseZip(
   // Security: validate total entry count
   if (centralDirEntries.length > maxEntries) {
     throw new Error(
-      `ZIP archive has too many entries: ${centralDirEntries.length} exceeds limit of ${maxEntries}`,
+      `ZIP archive has too many entries: ${centralDirEntries.length} exceeds limit of ${maxEntries}`
     );
   }
 
@@ -166,14 +159,14 @@ export async function parseZip(
     // Security: check single entry size
     if (data.length > maxEntrySize) {
       throw new Error(
-        `ZIP entry "${cdEntry.fileName}" exceeds maximum size: ${data.length} > ${maxEntrySize}`,
+        `ZIP entry "${cdEntry.fileName}" exceeds maximum size: ${data.length} > ${maxEntrySize}`
       );
     }
 
     totalUncompressedSize += localHeader.uncompressedSize;
     if (totalUncompressedSize > maxTotalSize) {
       throw new Error(
-        `ZIP archive total size exceeds limit: ${totalUncompressedSize} > ${maxTotalSize}`,
+        `ZIP archive total size exceeds limit: ${totalUncompressedSize} > ${maxTotalSize}`
       );
     }
 
@@ -202,23 +195,23 @@ export async function parseZip(
  */
 function sanitizePath(name: string): string {
   if (!name || name.length === 0) {
-    throw new Error('ZIP entry path is empty');
+    throw new Error("ZIP entry path is empty");
   }
 
-  const normalized = name.replace(/\\/g, '/');
+  const normalized = name.replace(/\\/g, "/");
 
   // Reject absolute paths
-  if (normalized.startsWith('/')) {
+  if (normalized.startsWith("/")) {
     throw new Error(`Path traversal blocked: absolute path in entry "${name}"`);
   }
 
   // Reject paths with '..' components
-  const parts = normalized.split('/');
+  const parts = normalized.split("/");
   for (const part of parts) {
-    if (part === '..') {
+    if (part === "..") {
       throw new Error(`Path traversal blocked: ".." component in entry "${name}"`);
     }
-    if (part === '.' && parts.length === 1) {
+    if (part === "." && parts.length === 1) {
       throw new Error(`Path traversal blocked: entry path is "."`);
     }
   }
@@ -228,7 +221,7 @@ function sanitizePath(name: string): string {
 
 export async function parseLocalHeader(
   source: { read(offset: number, length: number): Promise<Uint8Array>; size(): Promise<number> },
-  offset: number,
+  offset: number
 ): Promise<ZipLocalHeader> {
   const buf = await source.read(offset, 30);
   const signature = readU32LE(buf, 0);
@@ -298,10 +291,13 @@ export function parseCentralDirEntry(buffer: Uint8Array, offset: number): ZipCen
   const localHeaderOffset = readU32LE(buffer, offset + 42);
 
   const fileNameBuf = buffer.subarray(offset + 46, offset + 46 + fileNameLength);
-  const extraField = buffer.subarray(offset + 46 + fileNameLength, offset + 46 + fileNameLength + extraFieldLength);
+  const extraField = buffer.subarray(
+    offset + 46 + fileNameLength,
+    offset + 46 + fileNameLength + extraFieldLength
+  );
   const commentBuf = buffer.subarray(
     offset + 46 + fileNameLength + extraFieldLength,
-    offset + 46 + fileNameLength + extraFieldLength + commentLength,
+    offset + 46 + fileNameLength + extraFieldLength + commentLength
   );
 
   return {

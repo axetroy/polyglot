@@ -1,7 +1,7 @@
-import type { BinarySource } from '@polyglot/binary';
-import { FormatRegistry } from './registry.js';
+import type { BinarySource } from "@polyglot/binary";
+import { FormatRegistry } from "./registry.js";
 
-import type { DetectionResult, PolyglotInfo } from './types.js';
+import type { DetectionResult, PolyglotInfo } from "./types.js";
 
 /**
  * Creates a BinarySource that reads from `source` starting at `offset`.
@@ -44,7 +44,7 @@ export class Detector {
         // Create a source that skips the front prefix
         const backSource = createBackSource(source, frontSize);
         const info = await adapter.inspect(backSource);
-        if (info && typeof info === 'object' && 'format' in info) {
+        if (info && typeof info === "object" && "format" in info) {
           backFormat = (info as { format: string }).format;
           break;
         }
@@ -59,7 +59,7 @@ export class Detector {
 
     // Check compatibility
     const rule = this.registry.getCompatibility(frontFormat, backFormat);
-    if (!rule?.supported && rule?.mode !== 'experimental') {
+    if (!rule?.supported && rule?.mode !== "experimental") {
       return { isPolyglot: false, front: { format: frontFormat } };
     }
 

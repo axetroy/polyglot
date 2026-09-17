@@ -50,7 +50,7 @@ export function concatBytes(...arrays: Uint8Array[]): Uint8Array {
 
 /** Decode a byte range as Latin-1/ASCII text. */
 export function toAscii(buf: Uint8Array, start: number, end: number): string {
-  let out = '';
+  let out = "";
   for (let i = start; i < end; i++) out += String.fromCharCode(buf[i]!);
   return out;
 }

@@ -6,11 +6,11 @@ The engine applies limits at multiple layers when building and reading polyglot 
 
 While parsing the archive, the engine checks three independent upper bounds in parallel:
 
-| Limit | Default | Meaning |
-| --- | --- | --- |
-| `maxEntries` | 10 000 | Maximum number of entries allowed in the central directory |
-| `maxEntrySize` | 1 GiB | Maximum decompressed size for a single entry |
-| `maxTotalSize` | 10 GiB | Maximum total decompressed size across all entries |
+| Limit          | Default | Meaning                                                    |
+| -------------- | ------- | ---------------------------------------------------------- |
+| `maxEntries`   | 10 000  | Maximum number of entries allowed in the central directory |
+| `maxEntrySize` | 1 GiB   | Maximum decompressed size for a single entry               |
+| `maxTotalSize` | 10 GiB  | Maximum total decompressed size across all entries         |
 
 Crossing any of them aborts immediately — the parser does not continue decompressing:
 
@@ -34,14 +34,14 @@ The browser-side `@polyglot/browser` enforces the same three caps during `synthe
 
 ```typescript
 // All blocked
-sanitizePath('..//etc/passwd');    // ".." component
-sanitizePath('/etc/passwd');       // absolute path
-sanitizePath('..');                // ".." component
-sanitizePath('.');                 // entry path is "."
+sanitizePath("..//etc/passwd"); // ".." component
+sanitizePath("/etc/passwd"); // absolute path
+sanitizePath(".."); // ".." component
+sanitizePath("."); // entry path is "."
 
 // Allowed
-sanitizePath('nested/dir.txt');    // ✅
-sanitizePath('a..b.txt');          // ✅ (not an exact ".." match)
+sanitizePath("nested/dir.txt"); // ✅
+sanitizePath("a..b.txt"); // ✅ (not an exact ".." match)
 ```
 
 The CLI's `extract` command depends on the same validation layer.
@@ -58,9 +58,9 @@ PNG requires an `IEND` chunk to be considered valid; JPEG tolerates missing `EOI
 Only explicitly registered adapters are accepted. The defaults register:
 
 | Front | Identifier |
-| --- | --- |
-| PNG | `'png'` |
-| JPEG | `'jpeg'` |
+| ----- | ---------- |
+| PNG   | `'png'`    |
+| JPEG  | `'jpeg'`   |
 
 Unsupported formats (GIF, WebP, BMP, etc.) cause `create()` to throw `Unsupported front format: gif` **without producing any output file**. The same applies to unregistered back formats.
 

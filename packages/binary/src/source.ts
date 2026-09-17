@@ -1,4 +1,4 @@
-import { alloc, allocFill, concat, copy } from './bytes.js';
+import { alloc, allocFill, concat, copy } from "./bytes.js";
 
 export interface BinarySource {
   size(): Promise<number>;
@@ -41,14 +41,14 @@ export class PathSource implements BinarySource {
   constructor(private readonly path: string) {}
 
   async size(): Promise<number> {
-    const fs = await import('fs/promises');
+    const fs = await import("fs/promises");
     const stat = await fs.stat(this.path);
     return stat.size;
   }
 
   async read(offset: number, length: number): Promise<Uint8Array> {
-    const fs = await import('fs/promises');
-    const fd = await fs.open(this.path, 'r');
+    const fs = await import("fs/promises");
+    const fd = await fs.open(this.path, "r");
     try {
       const buffer = alloc(length);
       const { bytesRead } = await fd.read(buffer, 0, length, offset);
@@ -59,10 +59,10 @@ export class PathSource implements BinarySource {
   }
 
   async *stream(start = 0, end?: number): AsyncIterable<Uint8Array> {
-    const fs = await import('fs/promises');
+    const fs = await import("fs/promises");
     const size = await this.size();
     const sliceEnd = end ?? size;
-    const fd = await fs.open(this.path, 'r');
+    const fd = await fs.open(this.path, "r");
     try {
       const chunkSize = 64 * 1024;
       let pos = start;
@@ -117,7 +117,7 @@ export class StreamSource implements BinarySource {
 
   constructor(
     private readonly readable: AsyncIterable<Uint8Array>,
-    maxSize = 2 * 1024 * 1024 * 1024,
+    maxSize = 2 * 1024 * 1024 * 1024
   ) {
     this.maxSize = maxSize;
   }
@@ -179,7 +179,7 @@ export async function readAll(source: BinarySource): Promise<Uint8Array> {
  * or an existing BinarySource and return a BinarySource wrapper.
  */
 export function toSource(data: string | Uint8Array | BinarySource): BinarySource {
-  if (typeof data === 'string') {
+  if (typeof data === "string") {
     return new PathSource(data);
   }
   // Buffer is a Uint8Array subclass — accept both transparently.

@@ -1,4 +1,4 @@
-import { describe, it, expect } from 'vitest';
+import { describe, it, expect } from "vitest";
 import {
   crc32,
   isPng,
@@ -19,10 +19,10 @@ import {
   inspect,
   extract,
   DEFAULT_SECURITY_LIMITS,
-} from '@polyglot/browser';
+} from "@polyglot/browser";
 // Node-side parser used to cross-validate the browser implementation.
-import { parseZip } from '@polyglot/formats-zip';
-import { BufferSource } from '@polyglot/binary';
+import { parseZip } from "@polyglot/formats-zip";
+import { BufferSource } from "@polyglot/binary";
 
 // ── Fixture builders ──────────────────────────────────────
 const CRC_TABLE = (() => {
@@ -60,7 +60,7 @@ function makePng(width = 2, height = 3): Uint8Array {
   ihdr[8] = 8; // bit depth
   ihdr[9] = 2; // truecolor
   const idat = new Uint8Array([0x78, 0x9c, 0x63, 0x00, 0x00, 0x00, 0x01, 0x00, 0x01]);
-  const parts = [sig, chunk('IHDR', ihdr), chunk('IDAT', idat), chunk('IEND', new Uint8Array(0))];
+  const parts = [sig, chunk("IHDR", ihdr), chunk("IDAT", idat), chunk("IEND", new Uint8Array(0))];
   const total = parts.reduce((n, p) => n + p.length, 0);
   const out = new Uint8Array(total);
   let off = 0;
@@ -96,43 +96,43 @@ function makeJpeg(width = 4, height = 5): Uint8Array {
 const enc = (s: string) => new TextEncoder().encode(s);
 
 // ── CRC-32 ────────────────────────────────────────────────
-describe('crc32', () => {
-  it('matches known vectors', () => {
-    expect(crc32(enc(''))).toBe(0);
-    expect(crc32(enc('a'))).toBe(0xe8b7be43);
-    expect(crc32(enc('abc'))).toBe(0x352441c2);
-    expect(crc32(enc('123456789'))).toBe(0xcbf43926);
+describe("crc32", () => {
+  it("matches known vectors", () => {
+    expect(crc32(enc(""))).toBe(0);
+    expect(crc32(enc("a"))).toBe(0xe8b7be43);
+    expect(crc32(enc("abc"))).toBe(0x352441c2);
+    expect(crc32(enc("123456789"))).toBe(0xcbf43926);
   });
 });
 
 // ── PNG ───────────────────────────────────────────────────
-describe('browser PNG', () => {
-  it('detects the PNG signature', () => {
+describe("browser PNG", () => {
+  it("detects the PNG signature", () => {
     expect(isPng(makePng())).toBe(true);
-    expect(isPng(enc('not a png'))).toBe(false);
+    expect(isPng(enc("not a png"))).toBe(false);
     expect(isPng(new Uint8Array([0x89, 0x50]))).toBe(false);
   });
 
-  it('parses dimensions and stops at IEND', () => {
+  it("parses dimensions and stops at IEND", () => {
     const info = parsePng(makePng(7, 9));
     expect(info.width).toBe(7);
     expect(info.height).toBe(9);
     expect(info.bitDepth).toBe(8);
     expect(info.colorType).toBe(2);
     expect(info.valid).toBe(true);
-    expect(info.chunks.map((c) => c.type)).toEqual(['IHDR', 'IDAT', 'IEND']);
+    expect(info.chunks.map((c) => c.type)).toEqual(["IHDR", "IDAT", "IEND"]);
     expect(info.size).toBe(makePng().length);
   });
 
-  it('ignores trailing bytes after IEND', () => {
+  it("ignores trailing bytes after IEND", () => {
     const png = makePng();
     const withTrailer = new Uint8Array(png.length + 10);
     withTrailer.set(png);
-    withTrailer.set(enc('TRAILING!!'), png.length);
+    withTrailer.set(enc("TRAILING!!"), png.length);
     expect(parsePng(withTrailer).size).toBe(png.length);
   });
 
-  it('rejects a PNG without IEND', () => {
+  it("rejects a PNG without IEND", () => {
     const png = makePng();
     const truncated = png.subarray(0, png.length - 12);
     const result = validatePng(truncated);
@@ -142,13 +142,13 @@ describe('browser PNG', () => {
 });
 
 // ── JPEG ──────────────────────────────────────────────────
-describe('browser JPEG', () => {
-  it('detects the SOI marker', () => {
+describe("browser JPEG", () => {
+  it("detects the SOI marker", () => {
     expect(isJpeg(makeJpeg())).toBe(true);
-    expect(isJpeg(enc('not a jpeg'))).toBe(false);
+    expect(isJpeg(enc("not a jpeg"))).toBe(false);
   });
 
-  it('parses dimensions from SOF0 and stops at EOI', () => {
+  it("parses dimensions from SOF0 and stops at EOI", () => {
     const info = parseJpeg(makeJpeg(11, 13));
     expect(info.width).toBe(11);
     expect(info.height).toBe(13);
@@ -157,7 +157,7 @@ describe('browser JPEG', () => {
     expect(info.size).toBe(makeJpeg().length);
   });
 
-  it('reports invalid when EOI is missing', () => {
+  it("reports invalid when EOI is missing", () => {
     const jpeg = makeJpeg();
     const result = validateJpeg(jpeg.subarray(0, jpeg.length - 2));
     expect(result.valid).toBe(false);
@@ -166,63 +166,63 @@ describe('browser JPEG', () => {
 });
 
 // ── Front format dispatch ─────────────────────────────────
-describe('front format dispatch', () => {
-  it('identifies png / jpeg / unknown', () => {
-    expect(detectFrontFormat(makePng())).toBe('png');
-    expect(detectFrontFormat(makeJpeg())).toBe('jpeg');
-    expect(detectFrontFormat(enc('GIF89a'))).toBeNull();
+describe("front format dispatch", () => {
+  it("identifies png / jpeg / unknown", () => {
+    expect(detectFrontFormat(makePng())).toBe("png");
+    expect(detectFrontFormat(makeJpeg())).toBe("jpeg");
+    expect(detectFrontFormat(enc("GIF89a"))).toBeNull();
   });
 
-  it('parseFrontImage returns the right tag and info', () => {
+  it("parseFrontImage returns the right tag and info", () => {
     expect(parseFrontImage(makePng(3, 4)).info.width).toBe(3);
-    expect(parseFrontImage(makeJpeg(5, 6)).format).toBe('jpeg');
-    expect(() => parseFrontImage(enc('nope'))).toThrow(/Unsupported front format/);
+    expect(parseFrontImage(makeJpeg(5, 6)).format).toBe("jpeg");
+    expect(() => parseFrontImage(enc("nope"))).toThrow(/Unsupported front format/);
   });
 });
 
 // ── ZIP building ──────────────────────────────────────────
-describe('browser buildZip', () => {
-  it('produces a ZIP the Node parser accepts (stored entries)', async () => {
+describe("browser buildZip", () => {
+  it("produces a ZIP the Node parser accepts (stored entries)", async () => {
     const archive = buildZip([
-      { name: 'hello.txt', data: enc('Hello') },
-      { name: 'world.txt', data: enc('World!') },
+      { name: "hello.txt", data: enc("Hello") },
+      { name: "world.txt", data: enc("World!") },
     ]);
 
     const parsed = await parseZip(new BufferSource(Buffer.from(archive)));
-    expect(parsed.entries.map((e) => e.name)).toEqual(['hello.txt', 'world.txt']);
-    expect(Buffer.from(parsed.entries[0]!.data).toString()).toBe('Hello');
-    expect(Buffer.from(parsed.entries[1]!.data).toString()).toBe('World!');
+    expect(parsed.entries.map((e) => e.name)).toEqual(["hello.txt", "world.txt"]);
+    expect(Buffer.from(parsed.entries[0]!.data).toString()).toBe("Hello");
+    expect(Buffer.from(parsed.entries[1]!.data).toString()).toBe("World!");
   });
 
-  it('records correct CRC-32 values', () => {
-    const archive = buildZip([{ name: 'a.txt', data: enc('abc') }]);
+  it("records correct CRC-32 values", () => {
+    const archive = buildZip([{ name: "a.txt", data: enc("abc") }]);
     const entries = listZipEntries(archive);
     expect(entries[0]!.crc32).toBe(0x352441c2);
   });
 
-  it('flags non-ASCII names as UTF-8', () => {
-    const archive = buildZip([{ name: '中文.txt', data: enc('x') }]);
+  it("flags non-ASCII names as UTF-8", () => {
+    const archive = buildZip([{ name: "中文.txt", data: enc("x") }]);
     const entries = listZipEntries(archive);
-    expect(entries[0]!.name).toBe('中文.txt');
+    expect(entries[0]!.name).toBe("中文.txt");
     expect(entries[0]!.compressedSize).toBe(1);
   });
 
-  it('flips the UTF-8 flag only for non-ASCII names', () => {
-    const ascii = buildZip([{ name: 'plain.txt', data: enc('x') }]);
-    const nonAscii = buildZip([{ name: '中文.txt', data: enc('x') }]);
-    const cdStart = findEocd(ascii) - 46 - 'plain.txt'.length;
+  it("flips the UTF-8 flag only for non-ASCII names", () => {
+    const ascii = buildZip([{ name: "plain.txt", data: enc("x") }]);
+    const nonAscii = buildZip([{ name: "中文.txt", data: enc("x") }]);
+    const cdStart = findEocd(ascii) - 46 - "plain.txt".length;
     const flagAscii = ascii[cdStart + 8]! | (ascii[cdStart + 9]! << 8);
-    const cdStart2 = findEocd(nonAscii) - 46 - enc('中文.txt').length;
+    const cdStart2 = findEocd(nonAscii) - 46 - enc("中文.txt").length;
     const flagNonAscii = nonAscii[cdStart2 + 8]! | (nonAscii[cdStart2 + 9]! << 8);
     expect(flagAscii & 0x0800).toBe(0);
     expect(flagNonAscii & 0x0800).toBe(0x0800);
   });
 
-  it('writes the EOCD entry count', () => {
+  it("writes the EOCD entry count", () => {
     const archive = buildZip([
-      { name: 'a', data: enc('1') },
-      { name: 'b', data: enc('2') },
-      { name: 'c', data: enc('3') },
+      { name: "a", data: enc("1") },
+      { name: "b", data: enc("2") },
+      { name: "c", data: enc("3") },
     ]);
     const eocd = findEocd(archive);
     expect(archive[eocd + 8]! | (archive[eocd + 9]! << 8)).toBe(3);
@@ -231,16 +231,16 @@ describe('browser buildZip', () => {
 });
 
 // ── Offset relocation ─────────────────────────────────────
-describe('browser relocateZipOffsets', () => {
-  it('returns the input unchanged for a non-positive adjustment', () => {
-    const archive = buildZip([{ name: 'a.txt', data: enc('a') }]);
+describe("browser relocateZipOffsets", () => {
+  it("returns the input unchanged for a non-positive adjustment", () => {
+    const archive = buildZip([{ name: "a.txt", data: enc("a") }]);
     expect(relocateZipOffsets(archive, 0)).toBe(archive);
   });
 
-  it('shifts the EOCD and central-directory pointers exactly once', async () => {
+  it("shifts the EOCD and central-directory pointers exactly once", async () => {
     const archive = buildZip([
-      { name: 'one.txt', data: enc('first') },
-      { name: 'two.txt', data: enc('second') },
+      { name: "one.txt", data: enc("first") },
+      { name: "two.txt", data: enc("second") },
     ]);
     const adjustment = 1000;
     const relocated = relocateZipOffsets(archive, adjustment);
@@ -251,7 +251,11 @@ describe('browser relocateZipOffsets', () => {
     // (a double-shift or a no-op would both fail this assertion).
     const expected = archive.slice();
     const eocd = findEocd(expected);
-    const cdOffset = expected[eocd + 16]! | (expected[eocd + 17]! << 8) | (expected[eocd + 18]! << 16) | (expected[eocd + 19]! << 24);
+    const cdOffset =
+      expected[eocd + 16]! |
+      (expected[eocd + 17]! << 8) |
+      (expected[eocd + 18]! << 16) |
+      (expected[eocd + 19]! << 24);
 
     let cursor = cdOffset;
     for (let i = 0; i < 2; i++) {
@@ -271,35 +275,37 @@ describe('browser relocateZipOffsets', () => {
     }
   });
 
-  it('throws on a buffer without an EOCD record', () => {
-    expect(() => relocateZipOffsets(enc("not a zip at all, way too short"), 10)).toThrow(/End of Central Directory/);
+  it("throws on a buffer without an EOCD record", () => {
+    expect(() => relocateZipOffsets(enc("not a zip at all, way too short"), 10)).toThrow(
+      /End of Central Directory/
+    );
   });
 });
 
 // ── Uploaded archive stays readable after relocation ──────
-describe('relocated archive readability', () => {
-  it('Node parser reads entries through the shifted offsets', async () => {
+describe("relocated archive readability", () => {
+  it("Node parser reads entries through the shifted offsets", async () => {
     const archive = buildZip([
-      { name: 'readme.md', data: enc('# Hi') },
-      { name: 'data.bin', data: new Uint8Array([1, 2, 3, 4, 5]) },
+      { name: "readme.md", data: enc("# Hi") },
+      { name: "data.bin", data: new Uint8Array([1, 2, 3, 4, 5]) },
     ]);
     const relocated = relocateZipOffsets(archive, 512);
 
     // A ZIP reader handed only the trailing slice must still resolve entries,
     // which only works when offsets were shifted (not left relative).
     const parsed = await parseZip(new BufferSource(Buffer.from(relocated)));
-    expect(parsed.entries.map((e) => e.name)).toEqual(['readme.md', 'data.bin']);
+    expect(parsed.entries.map((e) => e.name)).toEqual(["readme.md", "data.bin"]);
   });
 });
 
 // ── Prefix-tolerant parsing (concat offset) ───────────────
-describe('concat offset correction', () => {
-  it('reads the archive whether or not the image prefix is included', () => {
+describe("concat offset correction", () => {
+  it("reads the archive whether or not the image prefix is included", () => {
     const png = makePng(4, 4);
     const file = synthesize(png, {
       entries: [
-        { name: 'a.txt', data: enc('alpha') },
-        { name: 'b.txt', data: enc('beta') },
+        { name: "a.txt", data: enc("alpha") },
+        { name: "b.txt", data: enc("beta") },
       ],
     }).data;
 
@@ -315,28 +321,28 @@ describe('concat offset correction', () => {
     expect(fromWhole[0]!.crc32).toBe(fromSlice[0]!.crc32);
   });
 
-  it('reports zero concat for a standalone archive', () => {
-    const archive = buildZip([{ name: 'a.txt', data: enc('a') }]);
+  it("reports zero concat for a standalone archive", () => {
+    const archive = buildZip([{ name: "a.txt", data: enc("a") }]);
     expect(computeConcatOffset(archive, findEocd(archive))).toBe(0);
   });
 
-  it('extracts entries straight from a full polyglot buffer', async () => {
+  it("extracts entries straight from a full polyglot buffer", async () => {
     const jpeg = makeJpeg(3, 3);
-    const file = synthesize(jpeg, { entries: [{ name: 'x.txt', data: enc('payload') }] }).data;
+    const file = synthesize(jpeg, { entries: [{ name: "x.txt", data: enc("payload") }] }).data;
     const entries = await extractZipEntries(file);
-    expect(new TextDecoder().decode(entries[0]!.data)).toBe('payload');
+    expect(new TextDecoder().decode(entries[0]!.data)).toBe("payload");
   });
 });
 
 // ── Synthesis ─────────────────────────────────────────────
-describe('browser synthesize', () => {
-  it('produces a PNG+ZIP file the Node parser can read', async () => {
+describe("browser synthesize", () => {
+  it("produces a PNG+ZIP file the Node parser can read", async () => {
     const png = makePng(8, 8);
     const result = synthesize(png, {
-      entries: [{ name: 'note.txt', data: enc('polyglot') }],
+      entries: [{ name: "note.txt", data: enc("polyglot") }],
     });
 
-    expect(result.frontFormat).toBe('png');
+    expect(result.frontFormat).toBe("png");
     expect(result.frontSize).toBe(png.length);
     expect(result.totalSize).toBe(png.length + result.backSize);
     // Front image is byte-identical to the input.
@@ -346,160 +352,171 @@ describe('browser synthesize', () => {
     const archiveSlice = Buffer.from(result.data.subarray(png.length));
     const parsed = await parseZip(new BufferSource(archiveSlice));
     expect(parsed.entries).toHaveLength(1);
-    expect(Buffer.from(parsed.entries[0]!.data).toString()).toBe('polyglot');
+    expect(Buffer.from(parsed.entries[0]!.data).toString()).toBe("polyglot");
   });
 
-  it('produces a JPEG+ZIP file the Node parser can read', async () => {
+  it("produces a JPEG+ZIP file the Node parser can read", async () => {
     const jpeg = makeJpeg(16, 16);
     const result = synthesize(jpeg, {
       entries: [
-        { name: 'a.txt', data: enc('AAA') },
-        { name: 'b.txt', data: enc('BBB') },
+        { name: "a.txt", data: enc("AAA") },
+        { name: "b.txt", data: enc("BBB") },
       ],
     });
 
-    expect(result.frontFormat).toBe('jpeg');
+    expect(result.frontFormat).toBe("jpeg");
     expect(result.width).toBe(16);
     expect(result.height).toBe(16);
 
     const archiveSlice = Buffer.from(result.data.subarray(jpeg.length));
     const parsed = await parseZip(new BufferSource(archiveSlice));
-    expect(parsed.entries.map((e) => e.name)).toEqual(['a.txt', 'b.txt']);
+    expect(parsed.entries.map((e) => e.name)).toEqual(["a.txt", "b.txt"]);
   });
 
-  it('rejects an empty image', () => {
-    expect(() => synthesize(new Uint8Array(0), { entries: [{ name: 'a', data: enc('x') }] })).toThrow(/empty/);
+  it("rejects an empty image", () => {
+    expect(() =>
+      synthesize(new Uint8Array(0), { entries: [{ name: "a", data: enc("x") }] })
+    ).toThrow(/empty/);
   });
 
-  it('rejects an unsupported front format', () => {
-    expect(() => synthesize(enc('GIF89a......'), { entries: [{ name: 'a', data: enc('x') }] })).toThrow(
-      /Unsupported front format/,
-    );
+  it("rejects an unsupported front format", () => {
+    expect(() =>
+      synthesize(enc("GIF89a......"), { entries: [{ name: "a", data: enc("x") }] })
+    ).toThrow(/Unsupported front format/);
   });
 
-  it('rejects an invalid PNG (no IEND)', () => {
+  it("rejects an invalid PNG (no IEND)", () => {
     const png = makePng();
     expect(() =>
-      synthesize(png.subarray(0, png.length - 12), { entries: [{ name: 'a', data: enc('x') }] }),
+      synthesize(png.subarray(0, png.length - 12), { entries: [{ name: "a", data: enc("x") }] })
     ).toThrow(/IEND/);
   });
 
-  it('requires at least one entry', () => {
+  it("requires at least one entry", () => {
     expect(() => synthesize(makePng(), { entries: [] })).toThrow(/At least one/);
   });
 
-  it('enforces the entry-count limit', () => {
-    const entries = Array.from({ length: 5 }, (_, i) => ({ name: `f${i}`, data: enc('x') }));
-    expect(() => synthesize(makePng(), { entries, limits: { maxEntries: 3 } })).toThrow(/exceeds limit/);
+  it("enforces the entry-count limit", () => {
+    const entries = Array.from({ length: 5 }, (_, i) => ({ name: `f${i}`, data: enc("x") }));
+    expect(() => synthesize(makePng(), { entries, limits: { maxEntries: 3 } })).toThrow(
+      /exceeds limit/
+    );
   });
 
-  it('enforces the per-entry size limit', () => {
+  it("enforces the per-entry size limit", () => {
     expect(() =>
       synthesize(makePng(), {
-        entries: [{ name: 'big', data: new Uint8Array(2048) }],
+        entries: [{ name: "big", data: new Uint8Array(2048) }],
         limits: { maxEntrySize: 1024 },
-      }),
+      })
     ).toThrow(/exceeds maximum size/);
   });
 
-  it('enforces the total size limit', () => {
-    const entries = Array.from({ length: 4 }, (_, i) => ({ name: `f${i}`, data: new Uint8Array(1000) }));
-    expect(() => synthesize(makePng(), { entries, limits: { maxTotalSize: 3000 } })).toThrow(/Total size/);
+  it("enforces the total size limit", () => {
+    const entries = Array.from({ length: 4 }, (_, i) => ({
+      name: `f${i}`,
+      data: new Uint8Array(1000),
+    }));
+    expect(() => synthesize(makePng(), { entries, limits: { maxTotalSize: 3000 } })).toThrow(
+      /Total size/
+    );
   });
 
-  it('exposes sane default limits', () => {
+  it("exposes sane default limits", () => {
     expect(DEFAULT_SECURITY_LIMITS.maxEntries).toBeGreaterThan(0);
     expect(DEFAULT_SECURITY_LIMITS.maxEntrySize).toBeGreaterThan(0);
-    expect(DEFAULT_SECURITY_LIMITS.maxTotalSize).toBeGreaterThan(DEFAULT_SECURITY_LIMITS.maxEntrySize);
+    expect(DEFAULT_SECURITY_LIMITS.maxTotalSize).toBeGreaterThan(
+      DEFAULT_SECURITY_LIMITS.maxEntrySize
+    );
   });
 });
 
 // ── Inspect ───────────────────────────────────────────────
-describe('browser inspect', () => {
-  it('reports a plain PNG as non-polyglot', () => {
+describe("browser inspect", () => {
+  it("reports a plain PNG as non-polyglot", () => {
     const result = inspect(makePng(4, 4));
     expect(result.isPolyglot).toBe(false);
-    expect(result.front?.format).toBe('png');
+    expect(result.front?.format).toBe("png");
     expect(result.back).toBeUndefined();
   });
 
-  it('reports a synthesized file as polyglot with both sides', () => {
+  it("reports a synthesized file as polyglot with both sides", () => {
     const png = makePng(2, 2);
-    const file = synthesize(png, { entries: [{ name: 'x.txt', data: enc('x') }] }).data;
+    const file = synthesize(png, { entries: [{ name: "x.txt", data: enc("x") }] }).data;
     const result = inspect(file);
     expect(result.isPolyglot).toBe(true);
-    expect(result.front?.format).toBe('png');
+    expect(result.front?.format).toBe("png");
     expect(result.front?.size).toBe(png.length);
-    expect(result.back?.format).toBe('zip');
+    expect(result.back?.format).toBe("zip");
     expect(result.back?.entryCount).toBe(1);
-    expect(result.back?.entries[0]!.name).toBe('x.txt');
+    expect(result.back?.entries[0]!.name).toBe("x.txt");
   });
 
-  it('reports an empty file', () => {
+  it("reports an empty file", () => {
     expect(inspect(new Uint8Array(0)).error).toMatch(/empty/);
   });
 
-  it('reports unknown formats', () => {
-    expect(inspect(enc('PK\x03\x04 random')).isPolyglot).toBe(false);
+  it("reports unknown formats", () => {
+    expect(inspect(enc("PK\x03\x04 random")).isPolyglot).toBe(false);
   });
 });
 
 // ── Extract round-trip ────────────────────────────────────
-describe('browser extract', () => {
-  it('round-trips a PNG+ZIP file', async () => {
+describe("browser extract", () => {
+  it("round-trips a PNG+ZIP file", async () => {
     const png = makePng(6, 7);
     const entries = [
-      { name: 'one.txt', data: enc('first entry') },
-      { name: 'two.bin', data: new Uint8Array([9, 8, 7, 6]) },
+      { name: "one.txt", data: enc("first entry") },
+      { name: "two.bin", data: new Uint8Array([9, 8, 7, 6]) },
     ];
     const file = synthesize(png, { entries }).data;
 
     const result = await extract(file);
-    expect(result.front.format).toBe('png');
+    expect(result.front.format).toBe("png");
     expect(result.front.data).toEqual(png);
-    expect(result.entries.map((e) => e.name)).toEqual(['one.txt', 'two.bin']);
-    expect(new TextDecoder().decode(result.entries[0]!.data)).toBe('first entry');
+    expect(result.entries.map((e) => e.name)).toEqual(["one.txt", "two.bin"]);
+    expect(new TextDecoder().decode(result.entries[0]!.data)).toBe("first entry");
     expect(Array.from(result.entries[1]!.data)).toEqual([9, 8, 7, 6]);
   });
 
-  it('round-trips a JPEG+ZIP file', async () => {
+  it("round-trips a JPEG+ZIP file", async () => {
     const jpeg = makeJpeg(10, 20);
-    const file = synthesize(jpeg, { entries: [{ name: 'j.txt', data: enc('jpeg side') }] }).data;
+    const file = synthesize(jpeg, { entries: [{ name: "j.txt", data: enc("jpeg side") }] }).data;
 
     const result = await extract(file);
-    expect(result.front.format).toBe('jpeg');
+    expect(result.front.format).toBe("jpeg");
     expect(result.front.data).toEqual(jpeg);
-    expect(new TextDecoder().decode(result.entries[0]!.data)).toBe('jpeg side');
+    expect(new TextDecoder().decode(result.entries[0]!.data)).toBe("jpeg side");
   });
 
-  it('rejects a plain image with no archive', async () => {
+  it("rejects a plain image with no archive", async () => {
     await expect(extract(makePng())).rejects.toThrow(/Not a polyglot file/);
   });
 });
 
 // ── ZIP entry extraction helpers ──────────────────────────
-describe('browser extractZipEntries', () => {
-  it('extracts stored entries', async () => {
+describe("browser extractZipEntries", () => {
+  it("extracts stored entries", async () => {
     const archive = buildZip([
-      { name: 'a.txt', data: enc('AAA') },
-      { name: 'b.txt', data: enc('BBB') },
+      { name: "a.txt", data: enc("AAA") },
+      { name: "b.txt", data: enc("BBB") },
     ]);
     const entries = await extractZipEntries(archive);
-    expect(new TextDecoder().decode(entries[0]!.data)).toBe('AAA');
-    expect(new TextDecoder().decode(entries[1]!.data)).toBe('BBB');
+    expect(new TextDecoder().decode(entries[0]!.data)).toBe("AAA");
+    expect(new TextDecoder().decode(entries[1]!.data)).toBe("BBB");
   });
 
-  it('handles zero-length entries', async () => {
-    const archive = buildZip([{ name: 'empty.txt', data: new Uint8Array(0) }]);
+  it("handles zero-length entries", async () => {
+    const archive = buildZip([{ name: "empty.txt", data: new Uint8Array(0) }]);
     const entries = await extractZipEntries(archive);
     expect(entries[0]!.data.length).toBe(0);
     expect(listZipEntries(archive)[0]!.crc32).toBe(0);
   });
 
-  it('lists entries with correct sizes', () => {
+  it("lists entries with correct sizes", () => {
     const archive = buildZip([
-      { name: 'x', data: new Uint8Array(10) },
-      { name: 'y', data: new Uint8Array(250) },
+      { name: "x", data: new Uint8Array(10) },
+      { name: "y", data: new Uint8Array(250) },
     ]);
     const metas = listZipEntries(archive);
     expect(metas[0]!.uncompressedSize).toBe(10);
@@ -507,8 +524,8 @@ describe('browser extractZipEntries', () => {
     expect(metas[0]!.compressionMethod).toBe(0);
   });
 
-  it('throws on a corrupt local header', async () => {
-    const archive = buildZip([{ name: 'a.txt', data: enc('A') }]);
+  it("throws on a corrupt local header", async () => {
+    const archive = buildZip([{ name: "a.txt", data: enc("A") }]);
     archive[0] = 0x00; // clobber the local file header signature
     await expect(extractZipEntries(archive)).rejects.toThrow(/Corrupt ZIP/);
   });
