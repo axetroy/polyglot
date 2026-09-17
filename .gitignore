@@ -47,3 +47,6 @@ temp/
 
 # DSH local state
 .DSH_
+
+# Integration-test output fixtures (written by tests)
+tests/integration/tmp-errors/

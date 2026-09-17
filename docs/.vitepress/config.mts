@@ -44,6 +44,7 @@ export default defineConfig({
               items: [
                 { text: '快速开始', link: '/guide/getting-started' },
                 { text: '工作原理', link: '/guide/how-it-works' },
+                { text: '兼容性实测', link: '/guide/compatibility' },
                 { text: 'API 参考', link: '/guide/api' },
                 { text: '安全模型', link: '/guide/security' },
               ],
@@ -77,6 +78,7 @@ export default defineConfig({
               items: [
                 { text: 'Getting Started', link: '/en/guide/getting-started' },
                 { text: 'How It Works', link: '/en/guide/how-it-works' },
+                { text: 'Compatibility', link: '/en/guide/compatibility' },
                 { text: 'API Reference', link: '/en/guide/api' },
                 { text: 'Security Model', link: '/en/guide/security' },
               ],

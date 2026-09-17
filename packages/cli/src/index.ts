@@ -1,4 +1,5 @@
 import { Command } from 'commander';
+import { dirname, join } from 'path';
 import * as polyglot from '@polyglot/sdk';
 
 const program = new Command();
@@ -89,13 +90,15 @@ program
       for (const name of entries) {
         // Sanitize path to prevent directory traversal
         const safeName = name.replace(/\\/g, '/').split('/').filter(Boolean).join('/');
-        if (!safeName || safeName.startsWith('.')) {
+        if (!safeName || safeName.split('/').some((part) => part === '..' || part === '.') || safeName.startsWith('.')) {
           console.warn(`Skipping suspicious entry: ${name}`);
           continue;
         }
         const data = await archive.read(name);
-        const outPath = `${outputDir}/${safeName}`;
-        await fs.mkdir(new URL(outPath, import.meta.url).pathname, { recursive: true });
+        const outPath = join(outputDir, safeName);
+        // Nested entries need their parent directories created first; without
+        // this, writing `sub/dir/note.md` fails with ENOENT.
+        await fs.mkdir(dirname(outPath), { recursive: true });
         await fs.writeFile(outPath, data);
         console.log(`Extracted: ${safeName}`);
       }

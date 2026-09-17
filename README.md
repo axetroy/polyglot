@@ -40,7 +40,7 @@ image.zip      → [ JPEG ] + [ ZIP ]    (JPG 查看器正常显示，ZIP 工具
     browser/    @polyglot/browser 交叉验证测试 (与 Node parser 对照)
     binary/     BinarySource 单元测试
     zip/        ZIP 安全测试 (Zip Bomb · Path Traversal · maxEntries)
-    compatibility/  CompatibilityEngine 单元测试
+    compatibility/  兼容性单元测试 + 真实第三方工具解压验证
     detector/   Detector 集成测试
     integration/ PolyglotFile 端到端测试
 ```
@@ -88,11 +88,10 @@ npm run docs:preview      # 本地预览构建结果
 ## CLI
 
 ```bash
-# 创建 polyglot 文件
+# 创建 polyglot 文件（--add 内联文本；如需要二进制内容，请用 SDK）
 polyglot create --front image.png --back zip \
-  --add readme.txt:hello --add data.bin:@binary.bin \
+  --add readme.txt:hello \
   --output polyglot.png.zip
-
 # 检查文件
 polyglot inspect polyglot.png.zip
 
@@ -133,6 +132,19 @@ const archive = await polyglot.polyglot.openBack('polyglot.png');
 const names = await archive.list();
 const data = await archive.read('readme.txt');
 ```
+
+## 兼容性（实测）
+
+产出的文件可直接用下列工具正常解压，内容逐字节一致（详见[兼容性实测](https://axetroy.github.io/polyglot/guide/compatibility)，或直接跑 `npm test -- tests/compatibility/third-party.test.ts`）：
+
+| 工具 | 列举 | 解压 |
+|------|------|------|
+| `unzip` / `zipinfo`（Info-ZIP） | ✅ | ✅ 无 `extra bytes` 警告 |
+| `bsdtar` / `tar`（libarchive） | ✅ | ✅ |
+| Python `zipfile` | ✅ | ✅ CRC 全部通过 |
+| 7-Zip | ✅ | ✅ 识别为 SFX 前缀 |
+
+已知边界：要求文件第 0 字节就是 ZIP 签名的实现（如 Apple `ditto`）无法打开图片前端的文件——这是格式层面的互斥，不是缺陷。
 
 ## 安全特性
 

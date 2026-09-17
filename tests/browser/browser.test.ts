@@ -244,11 +244,11 @@ describe('browser relocateZipOffsets', () => {
     ]);
     const adjustment = 1000;
     const relocated = relocateZipOffsets(archive, adjustment);
-    expect(relocated.length).toBe(archive.length + adjustment);
+    // Relocation only rewrites offsets; the archive bytes keep their size.
+    expect(relocated.length).toBe(archive.length);
 
-    // The original offsets were 0 and 30+len("one.txt")+5; after relocation they
-    // must be exactly original + adjustment (a double-shift would overshoot).
-    const shifted = relocated.subarray(adjustment);
+    // Every central-directory pointer must be exactly original + adjustment
+    // (a double-shift or a no-op would both fail this assertion).
     const expected = archive.slice();
     const eocd = findEocd(expected);
     const cdOffset = expected[eocd + 16]! | (expected[eocd + 17]! << 8) | (expected[eocd + 18]! << 16) | (expected[eocd + 19]! << 24);
@@ -261,10 +261,10 @@ describe('browser relocateZipOffsets', () => {
         (expected[cursor + 44]! << 16) |
         (expected[cursor + 45]! << 24);
       const newLocal =
-        shifted[cursor + 42]! |
-        (shifted[cursor + 43]! << 8) |
-        (shifted[cursor + 44]! << 16) |
-        (shifted[cursor + 45]! << 24);
+        relocated[cursor + 42]! |
+        (relocated[cursor + 43]! << 8) |
+        (relocated[cursor + 44]! << 16) |
+        (relocated[cursor + 45]! << 24);
       expect(newLocal).toBe(origLocal + adjustment);
       const nameLen = expected[cursor + 28]! | (expected[cursor + 29]! << 8);
       cursor += 46 + nameLen;
@@ -304,14 +304,14 @@ describe('concat offset correction', () => {
     }).data;
 
     // Parsed standalone the offsets are archive-relative; parsed inside the
-    // polyglot file the EOCD position reveals the prefix, so the same entries
-    // must be found with image-length-shifted pointers.
+    // polyglot file the pointers are absolute (image prefix included), so the
+    // same entries must be found in both views with consistent pointers.
     const fromSlice = listZipEntries(file.subarray(png.length));
     const fromWhole = listZipEntries(file);
 
     expect(fromWhole.map((e) => e.name)).toEqual(fromSlice.map((e) => e.name));
-    expect(fromSlice[0]!.localHeaderOffset).toBe(png.length);
-    expect(fromWhole[0]!.localHeaderOffset).toBe(png.length * 2);
+    expect(fromSlice[0]!.localHeaderOffset).toBe(0);
+    expect(fromWhole[0]!.localHeaderOffset).toBe(png.length);
     expect(fromWhole[0]!.crc32).toBe(fromSlice[0]!.crc32);
   });
 

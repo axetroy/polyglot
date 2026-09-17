@@ -126,6 +126,13 @@ describe('PNG + ZIP polyglot', () => {
     const buffer = file.getBuffer();
     expect(buffer.length).toBeGreaterThan(0);
 
+    // Regression: the ZIP must be appended once, immediately after the image.
+    // A padded relocation would inflate the file by a whole image length.
+    const { statSync } = await import('fs');
+    const pngSize = statSync(pngPath).size;
+    const standaloneZip = await zipAdapter.create([{ name: 'hello.txt', data: Buffer.from('Hello World') }]);
+    expect(buffer.length).toBe(pngSize + standaloneZip.length);
+
     const info = await engine.inspect(outputPath);
     expect(info.polyglot).toBe(true);
     expect(info.front?.format).toBe('png');

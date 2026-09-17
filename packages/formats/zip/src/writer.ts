@@ -1,7 +1,7 @@
 import {
   readU16LE, readU32LE,
   writeU16LE, writeU32LE,
-  alloc, allocFill, concat, fromString,
+  alloc, concat, fromString,
 } from '@polyglot/binary';
 import {
   ZIP_CENTRAL_DIR_SIG,
@@ -22,6 +22,16 @@ export interface ZipBuildOptions {
 
 const DEFAULT_COMPRESSION_METHOD = 0; // STORED
 const DEFAULT_VERSION_NEEDED = 20; // 2.0
+/** General purpose bit 11: the file name is UTF-8 encoded. */
+const FLAG_UTF8 = 0x0800;
+
+/** Entry names are always UTF-8; flag them so tools don't guess a legacy codepage. */
+function hasNonAscii(value: string): boolean {
+  for (let i = 0; i < value.length; i++) {
+    if (value.charCodeAt(i) > 0x7f) return true;
+  }
+  return false;
+}
 
 export function buildZip(entries: ZipEntryData[], options: ZipBuildOptions = {}): Uint8Array {
   const { offsetAdjustment = 0, versionNeeded = DEFAULT_VERSION_NEEDED } = options;
@@ -67,7 +77,7 @@ export function buildZip(entries: ZipEntryData[], options: ZipBuildOptions = {})
     writeU32LE(cdEntry, 0, ZIP_CENTRAL_DIR_SIG);
     writeU16LE(cdEntry, 4, 3000); // version made by (Unix)
     writeU16LE(cdEntry, 6, versionNeeded);
-    writeU16LE(cdEntry, 8, 0); // flags
+    writeU16LE(cdEntry, 8, hasNonAscii(entry.name) ? FLAG_UTF8 : 0); // flags
     writeU16LE(cdEntry, 10, method);
     writeU16LE(cdEntry, 12, 0); // mod time
     writeU16LE(cdEntry, 14, 0); // mod date
@@ -111,7 +121,7 @@ export function buildZip(entries: ZipEntryData[], options: ZipBuildOptions = {})
     const header = alloc(30);
     writeU32LE(header, 0, ZIP_LOCAL_FILE_HEADER_SIG);
     writeU16LE(header, 4, versionNeeded);
-    writeU16LE(header, 6, 0); // flags
+    writeU16LE(header, 6, hasNonAscii(entry.name) ? FLAG_UTF8 : 0); // flags
     writeU16LE(header, 8, method);
     writeU16LE(header, 10, 0); // mod time
     writeU16LE(header, 12, 0); // mod date
@@ -174,35 +184,30 @@ export function relocateZipOffsets(buffer: Uint8Array, adjustment: number): Uint
   const centralDirOffset = readU32LE(buffer, eocdOffset + 16);
   const centralDirSize = readU32LE(buffer, eocdOffset + 12);
 
-  // Create new buffer with extra space for the front prefix
-  const newBufferSize = buffer.length + adjustment;
-  const newBuffer = allocFill(newBufferSize);
-
-  // Copy original data, shifted by adjustment
-  newBuffer.set(buffer, adjustment);
+  // Rewrite the pointers in a same-length copy: the archive keeps its own bytes
+  // and position, only the absolute offsets grow by the prefix length.  Padding
+  // the archive to make the offsets "physically" correct would work too, but it
+  // doubles the file size and defeats offset-compensating readers (unzip).
+  // (Explicit copy: Buffer#slice returns a shared view, unlike Uint8Array#slice.)
+  const newBuffer = alloc(buffer.length);
+  newBuffer.set(buffer);
 
   // Update EOCD central directory offset
-  const newEocdOffset = eocdOffset + adjustment;
-  writeU32LE(newBuffer, newEocdOffset + 16, centralDirOffset + adjustment);
+  writeU32LE(newBuffer, eocdOffset + 16, centralDirOffset + adjustment);
 
   // Update central directory entries' local header offsets
-  // Read from ORIGINAL buffer to get pre-relocation offsets, then write adjusted values
-  let origCdOffset = centralDirOffset;
-  let newCdOffset = centralDirOffset + adjustment;
+  let cdOffset = centralDirOffset;
   const cdEnd = centralDirOffset + centralDirSize;
-  while (origCdOffset < cdEnd) {
-    if (readU32LE(buffer, origCdOffset) !== ZIP_CENTRAL_DIR_SIG) {
+  while (cdOffset < cdEnd) {
+    if (readU32LE(newBuffer, cdOffset) !== ZIP_CENTRAL_DIR_SIG) {
       break;
     }
-    // Read local header offset from ORIGINAL buffer (pre-relocation)
-    const origLocalOffset = readU32LE(buffer, origCdOffset + 42);
-    // Write adjusted offset to NEW buffer
-    writeU32LE(newBuffer, newCdOffset + 42, origLocalOffset + adjustment);
-    const fileNameLength = readU16LE(buffer, origCdOffset + 28);
-    const extraFieldLength = readU16LE(buffer, origCdOffset + 30);
-    const commentLength = readU16LE(buffer, origCdOffset + 32);
-    origCdOffset += 46 + fileNameLength + extraFieldLength + commentLength;
-    newCdOffset += 46 + fileNameLength + extraFieldLength + commentLength;
+    const localOffset = readU32LE(newBuffer, cdOffset + 42);
+    writeU32LE(newBuffer, cdOffset + 42, localOffset + adjustment);
+    const fileNameLength = readU16LE(newBuffer, cdOffset + 28);
+    const extraFieldLength = readU16LE(newBuffer, cdOffset + 30);
+    const commentLength = readU16LE(newBuffer, cdOffset + 32);
+    cdOffset += 46 + fileNameLength + extraFieldLength + commentLength;
   }
 
   return newBuffer;

@@ -160,29 +160,28 @@ export function relocateZipOffsets(buffer: Uint8Array, adjustment: number): Uint
   const centralDirOffset = readU32LE(buffer, eocdOffset + 16);
   const centralDirSize = readU32LE(buffer, eocdOffset + 12);
 
-  const relocated = new Uint8Array(buffer.length + adjustment);
-  relocated.set(buffer, adjustment);
+  // Rewrite the pointers in a same-length copy: the archive keeps its own bytes
+  // and position, only the absolute offsets grow by the prefix length.  Padding
+  // the archive to make the offsets "physically" correct would work too, but it
+  // doubles the file size and defeats offset-compensating readers (unzip).
+  const relocated = new Uint8Array(buffer.length);
+  relocated.set(buffer);
 
-  writeU32LE(relocated, eocdOffset + adjustment + 16, centralDirOffset + adjustment);
+  writeU32LE(relocated, eocdOffset + 16, centralDirOffset + adjustment);
 
-  // Read offsets from the ORIGINAL buffer and write the shifted values into the
-  // new one — reading back from the new buffer would double-apply the shift.
-  let origCursor = centralDirOffset;
-  let newCursor = centralDirOffset + adjustment;
+  let cursor = centralDirOffset;
   const cdEnd = centralDirOffset + centralDirSize;
 
-  while (origCursor + 46 <= cdEnd) {
-    if (readU32LE(buffer, origCursor) !== ZIP_CENTRAL_DIR_SIG) break;
-    const localOffset = readU32LE(buffer, origCursor + 42);
-    writeU32LE(relocated, newCursor + 42, localOffset + adjustment);
+  while (cursor + 46 <= cdEnd) {
+    if (readU32LE(relocated, cursor) !== ZIP_CENTRAL_DIR_SIG) break;
+    const localOffset = readU32LE(relocated, cursor + 42);
+    writeU32LE(relocated, cursor + 42, localOffset + adjustment);
 
-    const nameLength = readU16LE(buffer, origCursor + 28);
-    const extraLength = readU16LE(buffer, origCursor + 30);
-    const commentLength = readU16LE(buffer, origCursor + 32);
-    const recordSize = 46 + nameLength + extraLength + commentLength;
+    const nameLength = readU16LE(relocated, cursor + 28);
+    const extraLength = readU16LE(relocated, cursor + 30);
+    const commentLength = readU16LE(relocated, cursor + 32);
 
-    origCursor += recordSize;
-    newCursor += recordSize;
+    cursor += 46 + nameLength + extraLength + commentLength;
   }
 
   return relocated;

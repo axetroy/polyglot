@@ -42,8 +42,8 @@ ZIP carries two kinds of **absolute offsets**:
 
 | Location | Field | Meaning |
 | --- | --- | --- |
-| EOCD + 16 | central directory offset | Position of the CD relative to the archive origin |
-| CD record + 42 | local file header offset | Position of each entry's local header relative to the archive origin |
+| EOCD + 16 | central directory offset | Position of the CD relative to the file origin |
+| CD record + 42 | local file header offset | Position of each entry's local header relative to the file origin |
 
 All other fields (sizes, CRC, name lengths) are relative and stay unchanged.
 
@@ -56,22 +56,33 @@ EOCD.centralDirOffset      += adjustment
 CD[i].localHeaderOffset   += adjustment
 ```
 
-In practice, `relocateZipOffsets` allocates a buffer that is `adjustment` bytes larger, copies the archive into the tail, and adds `adjustment` to both the EOCD and every CD record. The result:
+In practice, `relocateZipOffsets` rewrites only those two pointer fields in a **same-length copy** of the archive: the archive bytes themselves are never padded, moved or resized. The result:
 
-- In the polyglot file, local headers sit at image-length + archive-relative offset.
-- In the relocated archive read in isolation, offsets remain correct relative to the archive origin.
+- In the polyglot file, each local header sits at image length + archive-relative offset, so the archive follows the image immediately with **no padding in between**.
+- The recorded offsets are absolute positions in the whole file, so a parser that trusts them locates every entry with no compensation whatsoever.
+
+This is precisely what Info-ZIP `zip -A` does for self-extracting (SFX) archives: turn archive-relative offsets into file-absolute ones.
 
 ### The concat-offset correction
 
-Because stored offsets are relative to the archive origin rather than the file origin, standard ZIP tools derive the prefix length themselves:
+The ZIP spec allows an arbitrary prefix before the archive data (an SFX stub, for example), and standard tools derive that prefix's length from the EOCD:
 
 ```
 prefix = EOCD_absolute_position - centralDirSize - centralDirOffset
 ```
 
-This is exactly what `unzip` emits as `N extra bytes at beginning or within zipfile`, and the same logic is used by Python's `zipfile` module and 7-Zip. Adding this prefix to every stored offset yields true file-level positions, so the archive parses correctly both standalone and embedded inside the polyglot file — the browser-side parser implements this correction too.
+Because this implementation stores **absolute** offsets, parsing the **whole file** makes that formula yield `prefix = 0`: tools simply follow the recorded offsets and print no warning at all. The readers in this project implement the same correction, so they handle both the whole polyglot file and a bare "archive-only" slice.
 
-> Self-extracting SFX archives and `zip -A`-patched JAR files apply the same pattern, so the output remains compatible with third-party tools rather than requiring special handling.
+### Compatibility boundary (important)
+
+Parsers split into roughly two classes:
+
+| Class | Behaviour | Examples |
+| --- | --- | --- |
+| Trust the recorded offsets (with the optional concat correction) | ✅ opens the file | `unzip` / `zipinfo`, Python `zipfile`, libarchive (`bsdtar`, macOS Archive Utility), 7-Zip |
+| Require `PK\x03\x04` at byte 0 | ❌ refuses | Apple `ditto` (and parts of Finder's extraction path), some strict GUI tools |
+
+The second class is a **format-level mutual exclusion**: the PNG/JPEG signature must occupy byte 0, so ZIP cannot occupy byte 0 at the same time. Any consumer that insists on seeing ZIP at byte 0 can therefore never open an image-fronted polyglot file — that is an inherent boundary of this file shape, not an implementation defect. **Never make "every archiver can open it" a goal**; [Compatibility](/en/guide/compatibility) and `tests/compatibility/third-party.test.ts` pin the first class down with real tools.
 
 ## Compatibility matrix
 
