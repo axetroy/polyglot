@@ -107,3 +107,19 @@ jobs:
       - uses: actions/upload-pages-artifact@v5
         with:
           path: docs/.vitepress/dist
+
+  deploy:
+    name: Deploy GitHub Pages
+    needs: [docs]
+    if: github.event_name == 'push' && (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/master')
+    runs-on: ubuntu-latest
+    permissions:
+      pages: write
+      id-token: write
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - name: Deploy from Pages artifact
+        id: deployment
+        uses: actions/deploy-pages@v5
