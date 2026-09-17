@@ -33,9 +33,15 @@
     "typecheck:all": "npm run typecheck",
     "clean": "find packages -name dist -type d -exec rm -rf {} + 2>/dev/null; rm -rf node_modules .turbo coverage .eslintcache",
     "prepare": "is-ci || husky install",
-    "prepublishOnly": "npm run typecheck && npm run lint && npm run test:coverage"
+    "prepublishOnly": "npm run typecheck && npm run lint && npm run test:coverage",
+    "changeset": "changeset",
+    "version": "changeset version && npm run build && git add -A && git commit -m \"chore: version bump\" --no-verify || true",
+    "release": "changeset version && npm run build && npm publish -w @polyglot/sdk -w @polyglot/cli -w @polyglot/browser --provenance --access public && git push origin main --follow-tags",
+    "version:bump": "changeset version && npm run build && git add -A && git commit -m \"chore: version bump\""
   },
   "devDependencies": {
+    "@changesets/changelog-github": "^1.0.1",
+    "@changesets/cli": "^3.0.3",
     "@types/node": "^20.14.0",
     "@typescript-eslint/eslint-plugin": "^7.0.0",
     "@typescript-eslint/parser": "^7.0.0",
