@@ -63,7 +63,7 @@ jobs:
       - name: Install official 7-Zip (Linux)
         if: runner.os == 'Linux'
         run: |
-          curl -fsSL -o /tmp/7z.tar.xz https://www.7-zip.org/a/7z2409-linux-x64.tar.xz
+          curl -fsSL -o /tmp/7z.tar.xz https://github.com/ip7z/7zip/releases/download/26.03/7z2603-linux-x64.tar.xz
           mkdir -p /tmp/7zz && tar -xJf /tmp/7z.tar.xz -C /tmp/7zz
           echo "/tmp/7zz" >> "$GITHUB_PATH"
       - name: Install archive tools (macOS)
