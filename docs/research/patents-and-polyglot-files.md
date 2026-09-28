@@ -13,22 +13,24 @@
 ## 检索范围与方法
 
 ### 可访问的数据库与引擎
-| 来源 | 是否可访问 | 用途 |
-|------|-----------|------|
-| Exa Search API | ✅ | 跨搜索引擎检索 Google Patents、Exa.ai 专利索引、Justia、PatentsView、xjishu 等结果 |
-| Tavily Search API | ✅ | 辅助检索（尤其中文关键词） |
-| Google Scholar / ACM DL | ⚠️ 通过搜索索引间接 | 论文日期、DOI |
-| USPTO Patent Public Search API | ❌ 返回 SPA 壳 | 无法直接查询 |
-| PatentsView API (`search.patentsview.org`) | ❌ 301 重定向，无 JSON | |
-| Google Patents XHR 端点 | ❌ 连接超时 | |
-| Espacenet / EPO 全文 API | ❌ HTTP 403 / 500 | |
-| USPTO 全文文本 HTML | ✅（仅首页框架） | PDF 端点可下载但为扫描版 CCITT 图像 |
-| WIPO PatentScope | ⚠️ 仅首页，detail 需 JS | |
-| Justia / PatentGuru / FreePatentsOnline / TREA / PatentsEncyclopedia | ⚠️ 多数 403 / 429（Cloudflare/反爬） | 少数 TREA 返回完整页面 |
-| xjishu.com（中国专利镜像） | ✅ | 获取 CN 专利公开文本 |
-| arXiv / Patsnap Eureka | ⚠️ 部分 | |
+
+| 来源                                                                 | 是否可访问                           | 用途                                                                               |
+| -------------------------------------------------------------------- | ------------------------------------ | ---------------------------------------------------------------------------------- |
+| Exa Search API                                                       | ✅                                   | 跨搜索引擎检索 Google Patents、Exa.ai 专利索引、Justia、PatentsView、xjishu 等结果 |
+| Tavily Search API                                                    | ✅                                   | 辅助检索（尤其中文关键词）                                                         |
+| Google Scholar / ACM DL                                              | ⚠️ 通过搜索索引间接                  | 论文日期、DOI                                                                      |
+| USPTO Patent Public Search API                                       | ❌ 返回 SPA 壳                       | 无法直接查询                                                                       |
+| PatentsView API (`search.patentsview.org`)                           | ❌ 301 重定向，无 JSON               |                                                                                    |
+| Google Patents XHR 端点                                              | ❌ 连接超时                          |                                                                                    |
+| Espacenet / EPO 全文 API                                             | ❌ HTTP 403 / 500                    |                                                                                    |
+| USPTO 全文文本 HTML                                                  | ✅（仅首页框架）                     | PDF 端点可下载但为扫描版 CCITT 图像                                                |
+| WIPO PatentScope                                                     | ⚠️ 仅首页，detail 需 JS              |                                                                                    |
+| Justia / PatentGuru / FreePatentsOnline / TREA / PatentsEncyclopedia | ⚠️ 多数 403 / 429（Cloudflare/反爬） | 少数 TREA 返回完整页面                                                             |
+| xjishu.com（中国专利镜像）                                           | ✅                                   | 获取 CN 专利公开文本                                                               |
+| arXiv / Patsnap Eureka                                               | ⚠️ 部分                              |                                                                                    |
 
 ### 检索策略
+
 使用 exa / tavily 组合以下关键词（中英文）：
 
 - `"polyglot file" patent`
@@ -48,6 +50,7 @@
 - 各 prior art 事件（Black Hat 2008、PoC||GTFO 0x06/0x07、corkami/pocs、SSTIC 2013、ACM CCS 2013）
 
 ### 检索局限性
+
 - **不能直接下载 USPTO 原始全文 PDF**（为 CCITT G4 扫描图像，OCR 未启用；pymupdf 安装失败因系统 Python 环境限制）。
 - **无法绕过 Google Patents / Espacenet / Justia 的 Cloudflare 保护**，故无法读取专利完整权利要求书全文（仅能从搜索引擎摘要 + 部分镜像推断权利要求内容）。
 - **未尝试付费数据库**（Darts-ip、Innography、Lens.org 注册墙后）、**未查阅 EPO Register / CNIPA 原始文献**。
@@ -60,15 +63,15 @@
 
 目前未发现任何已授权专利的权利要求明确指向「一个字节流同时作为两种独立文件格式（例如既是有效 PNG 又是有效 ZIP）且两种标准解析器无需定制逻辑即可分别正确解析」的技术。下列专利是检索到的**最相关**条目，但均存在重要区别。
 
-| 专利号 | 标题 | 申请人 | 申请日 | 公开日 | 状态 | 与 polyglot 文件的关联 |
-|--------|------|--------|--------|--------|------|---------------------|
-| US8271544B2 | Data file having more than one mode of operation | Creative Technology Ltd | 2009-05-01 | 2012-09-18 | 已授权 | 图像组件 + 追加数据组件（如 MP3）；依赖"图像 EOF 后再接数据"。不是真正的双格式文件——标准 ZIP 解析器不会打开它。[来源](https://exa.ai/library/legal/patent/kj2vzgr8mvw2g5d7bldckt) |
-| US9009123B2 | Method of combining image files and other files | Shuttersong Incorporated | 2012-08-31 (优先权) | 2015-04-14 | 已授权 | JPEG EOF 标记后追加非图像数据（音频/文本等）。说明书明确提到"JPEG reader 在 EOF 处停止并忽略后面数据"，且数据容器可使用"标准归档技术"。未声称 ZIP+图像同时有效。[来源](https://trea.com/information/method-of-combining-image-files-and-other-files/patentgrant/0187060f-4496-4436-9e84-d65c381c7289) |
-| US10972746B2 | Method of combining image files and other files | Shuttersong Incorporated | 2015-05-29 | 2021-04-06 | 已授权 | 同族延续；权利要求内容基本一致，仍是 EOF-marker-after 方案。[来源](https://trea.com/information/method-of-combining-image-files-and-other-files/patentgrant/0187060f-4496-4436-9e84-d65c381c7289) |
-| US11386205B2 | Detection of malicious polyglot files | McAfee, LLC | 2019-01-14 | 2022-07-12 | 已授权 | **检测侧**，不涉及构造 polyglot 文件本身。[来源](https://exa.ai/library/legal/patent/v7zkzs63b3hgrm8jhy7gyh) |
-| US10725745B2 | Systems and methods for polyglot analysis | Walmart Apollo, LLC | 2018-05-24 | 2020-07-28 | 已授权 | "Polyglot" 指**多语言计算环境**（跨多种编程语言/平台的编译、分析系统），与文件 polyglot 无关。[来源](https://exa.ai/library/legal/patent/9hgt054tf46wjjf5fkvm7q) |
-| CN116472526A | 用于创建、读取和解码以可读取从而根据多种文件格式处理的格式编码的文件的装置和方法 | 华为技术有限公司 | 2020-12-04 (PCT national phase) | 2023-07-25 | **专利申请公开**（非授权） | 提出一种"多格式容器"：通用数据存一份，各格式专有数据分块 + 偏移指针。**目标是存储节省而非让两个独立解析器从同一字节流读出各自有效的文件**。与 true polyglot 不同。[来源](https://www.xjishu.com/zhuanli/55/202080107480.html) |
-| CN105354219A | 一种文件编码方法及装置 | 努比亚技术有限公司 | 2015-04-22 | 2016-02-24 | 已授权？（文档未显示失效） | 图片+视频合并为同一文件，在预设文件中添加标识位实现双解析器识别。属于**多媒体捆绑**范畴，而非 image↔archive polyglot。[来源](https://www.xjishu.com/zhuanli/55/CN105354219.html) |
+| 专利号       | 标题                                                                             | 申请人                   | 申请日                          | 公开日     | 状态                       | 与 polyglot 文件的关联                                                                                                                                                                                                                                                                                |
+| ------------ | -------------------------------------------------------------------------------- | ------------------------ | ------------------------------- | ---------- | -------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| US8271544B2  | Data file having more than one mode of operation                                 | Creative Technology Ltd  | 2009-05-01                      | 2012-09-18 | 已授权                     | 图像组件 + 追加数据组件（如 MP3）；依赖"图像 EOF 后再接数据"。不是真正的双格式文件——标准 ZIP 解析器不会打开它。[来源](https://exa.ai/library/legal/patent/kj2vzgr8mvw2g5d7bldckt)                                                                                                                     |
+| US9009123B2  | Method of combining image files and other files                                  | Shuttersong Incorporated | 2012-08-31 (优先权)             | 2015-04-14 | 已授权                     | JPEG EOF 标记后追加非图像数据（音频/文本等）。说明书明确提到"JPEG reader 在 EOF 处停止并忽略后面数据"，且数据容器可使用"标准归档技术"。未声称 ZIP+图像同时有效。[来源](https://trea.com/information/method-of-combining-image-files-and-other-files/patentgrant/0187060f-4496-4436-9e84-d65c381c7289) |
+| US10972746B2 | Method of combining image files and other files                                  | Shuttersong Incorporated | 2015-05-29                      | 2021-04-06 | 已授权                     | 同族延续；权利要求内容基本一致，仍是 EOF-marker-after 方案。[来源](https://trea.com/information/method-of-combining-image-files-and-other-files/patentgrant/0187060f-4496-4436-9e84-d65c381c7289)                                                                                                     |
+| US11386205B2 | Detection of malicious polyglot files                                            | McAfee, LLC              | 2019-01-14                      | 2022-07-12 | 已授权                     | **检测侧**，不涉及构造 polyglot 文件本身。[来源](https://exa.ai/library/legal/patent/v7zkzs63b3hgrm8jhy7gyh)                                                                                                                                                                                          |
+| US10725745B2 | Systems and methods for polyglot analysis                                        | Walmart Apollo, LLC      | 2018-05-24                      | 2020-07-28 | 已授权                     | "Polyglot" 指**多语言计算环境**（跨多种编程语言/平台的编译、分析系统），与文件 polyglot 无关。[来源](https://exa.ai/library/legal/patent/9hgt054tf46wjjf5fkvm7q)                                                                                                                                      |
+| CN116472526A | 用于创建、读取和解码以可读取从而根据多种文件格式处理的格式编码的文件的装置和方法 | 华为技术有限公司         | 2020-12-04 (PCT national phase) | 2023-07-25 | **专利申请公开**（非授权） | 提出一种"多格式容器"：通用数据存一份，各格式专有数据分块 + 偏移指针。**目标是存储节省而非让两个独立解析器从同一字节流读出各自有效的文件**。与 true polyglot 不同。[来源](https://www.xjishu.com/zhuanli/55/202080107480.html)                                                                         |
+| CN105354219A | 一种文件编码方法及装置                                                           | 努比亚技术有限公司       | 2015-04-22                      | 2016-02-24 | 已授权？（文档未显示失效） | 图片+视频合并为同一文件，在预设文件中添加标识位实现双解析器识别。属于**多媒体捆绑**范畴，而非 image↔archive polyglot。[来源](https://www.xjishu.com/zhuanli/55/CN105354219.html)                                                                                                                      |
 
 ### 关键区别说明
 
@@ -120,13 +123,13 @@ McAfee 的 US11386205（申请 2019-01-14，授权 2022-07-12）的说明书摘�
 
 ### 4. 其他可能相关的宽泛专利族
 
-| 专利号 | 主题 | 与 polyglot 的相关度 |
-|--------|------|---------------------|
-| US8407266B1 | 自动将文档保存到多种格式 | 低——格式转换，非同一字节流 |
-| US6085199A | 多格式分发文件 | 低——多份副本分发 |
-| US11258922B2 | 图像文件 + 其他文件组合 | 中——与 US9009123 同族，但重点在图像+非图像合并 |
-| US11330031B2 | 图像数据 + 其他数据类型编码 | 低——嵌入辅助信息，非双格式并行有效 |
-| WO2021/xxxx | （待查） | — |
+| 专利号       | 主题                        | 与 polyglot 的相关度                           |
+| ------------ | --------------------------- | ---------------------------------------------- |
+| US8407266B1  | 自动将文档保存到多种格式    | 低——格式转换，非同一字节流                     |
+| US6085199A   | 多格式分发文件              | 低——多份副本分发                               |
+| US11258922B2 | 图像文件 + 其他文件组合     | 中——与 US9009123 同族，但重点在图像+非图像合并 |
+| US11330031B2 | 图像数据 + 其他数据类型编码 | 低——嵌入辅助信息，非双格式并行有效             |
+| WO2021/xxxx  | （待查）                    | —                                              |
 
 ---
 
@@ -134,31 +137,31 @@ McAfee 的 US11386205（申请 2019-01-14，授权 2022-07-12）的说明书摘�
 
 > 来源主要基于后台研究员通过 Exa/Tavily 索引检索所得，每条均有对应 URL。未获直接访问确认的条目已标注。
 
-| 日期 | 公开披露内容 | 来源 |
-|------|-------------|------|
-| 1989-02-01 | PKZIP 0.90 发布，ZIP 格式诞生 | [fileformats.archiveteam.org](http://fileformats.archiveteam.org/wiki/PKZIP) |
-| 1989-07-21 | PKZIP 1.01/1.02 引入 MAKESFX.COM → PKSFX.PRG 自解压 EXE（可执行 stub + ZIP overlay） | [justsolve.archiveteam.org](http://justsolve.archiveteam.org/wiki/Self-extracting_ZIP) |
-| 1990-03-15 | PKZIP 1.10 新增 2934 字节 mini-PKSFX，不再需要 PKSFX.PRG | [files.mpoli.fi](https://files.mpoli.fi/unpacked/software/misc/pj2/pkz110.exe/whatsnew.110) |
-| 1990-05 | Info-ZIP UnZip 3.0 首发，附 `unzipsfx`（自解压 stub for prepending to ZIP archives） | [infozip.sourceforge.net](https://infozip.sourceforge.net/Info-ZIP2.html), [man.archlinux.org](https://man.archlinux.org/man/unzipsfx.1.en.raw) |
-| **2001-11-08/12** | **vuln-dev 邮件组线程 "Infected jpeg files?"**：Pete Simpson 发帖 `copy apic.jpg + bo2k.zip bo2k.jpg /b` —— JPEG 正常显示，WinZip 可打开附加的 ZIP；帖子称该技巧"已用于伪装盗版软件已久"。**这是能找到的最早书面公开记录**。 | [seclists.org/vuln-dev/2001/Nov/107](https://seclists.org/vuln-dev/2001/Nov/107) |
-| 2006-10-16/17 | Terminally Incoherent "Poor Man's Steganography"；Lifehacker "Hide files in JPEG images"，大众化传播 `cat / copy /b` 技巧 | [terminally-incoherent.com](https://www.terminally-incoherent.com/blog/2006/10/16/poor-mans-steganography/), [lifehacker.com](https://lifehacker.com/hide-files-in-jpeg-images-207905) |
-| 2007-11 | CERT VU#715737（Firefox `jar:` URI XSS）；gnucitizen (pdp) "Java JAR Attacks and Features" —— JAR 与图像的混合（"JPGAR"），先于 GIFAR | [gnucitizen.org](https://www.gnucitizen.org/blog/java-jar-attacks-and-features/), [kb.cert.org VU#715737](https://www.kb.cert.org/vuls/id/715737) |
-| **2008-08-01/02** | **GIFAR 公开**：InfoWorld、Ars Technica 率先报道；John Heasman 博客"On GIFARs"详细解释；Billy Rios & Nate McFeters 构建 GIF+JAR 攻击 | [infoworld.com](https://www.infoworld.com/article/2653025/a-photo-that-can-steal-your-online-credentials.html), [arstechnica.com](https://arstechnica.com/information-technology/2008/08/newly-found-hybrid-attack-embeds-java-applet-in-gif-file/), [heasman.blogspot.com](http://heasman.blogspot.com/2008/08/on-gifars.html) |
-| **2008-08-06/07** | **Black Hat USA 2008 Briefings**："Extreme Client-Side Exploitation"（McFeters, Carter, Heasman）正式演讲 GIFAR | [Black Hat schedule](https://blackhat.com/html/bh-usa-08/bh-usa-08-schedule.html), [slides PDF](https://blackhat.com/presentations/bh-usa-08/McFeters_Carter_Heasman/BH_US_08_Mcfeters_Carter_Heasman_Extreme_Client-Side_Exploitation.pdf) |
-| 2008-12-03/05 | Sun Alert 244988 + CVE-2008-5343 修复 GIFAR | [Oracle Sun Alert 1019738.1](https://download.oracle.com/sunalerts/1019738.1.html), [NVD CVE-2008-5343](https://nvd.nist.gov/vuln/detail/CVE-2008-5343) |
-| 2010 | Sundareswaran & Squicciarini, "Image repurposing for Gifar-based attacks"（CEAS 会议） | [CiteSeerX](http://citeseerx.ist.psu.edu/viewdoc/summary?doi=10.1.1.297.4607) |
-| 2013-06-05 | **SSTIC 2013** Ange Albertini "Polyglottes binaires et implications"（PE/Java/HTML/PDF/ZIP） | [sstic.org](https://www.sstic.org/2013/presentation/polyglottes_binaires_et_implications/) |
-| 2013-11 | **ACM CCS 2013** Magazinius, Rios, Sabelfeld "Polyglots: Crossing Origins by Crossing Formats"（首篇学术 polyglot 论文） | [ACM DL](https://dl.acm.org/doi/10.1145/2508859.2516685) |
-| 2014-06 | PoC||GTFO 0x04 "How to Manually Attach a File to a PDF" | [mcfp.felk.cvut.cz](https://mcfp.felk.cvut.cz/publicDatasets/pocorgtfo/contents/articles/04-12.pdf) |
-| 2014-11 | PoC||GTFO 0x06 "This TAR archive is a PDF! (as well as a ZIP…)" | [mcfp.felk.cvut.cz](https://mcfp.felk.cvut.cz/publicDatasets/pocorgtfo/contents/articles/06-04.pdf) |
-| 2014-12-29 | **31C3** Ange Albertini "Funky File Formats" | [media.ccc.de](https://media.ccc.de/v/31c3_-_5930_-_en_-_saal_6_-_201412291400_-_funky_file_formats_-_ange_albertini) |
-| **2015-03** | **PoC||GTFO 0x07** 第 6 篇文章 "Abusing file formats; or, Corkami, the Novella"（Ange Albertini）；README 称 truepolyglot 工具"See POC||GTFO 07"。**注意：0x07 中没有名为 "True Polyglot" 的文章，该名称不存在。** | [pocorgtfo.reilly.io](https://pocorgtfo.reilly.io/), [mcfp.felk.cvut.cz](https://mcfp.felk.cvut.cz/publicDatasets/pocorgtfo/contents/articles/07-06.pdf) |
-| 2015-03-26 | GitHub 仓库 `corkami/pocs` 建立（含 `poly/` 目录下的多格式 PoC）；`corkami/polyglot` **不存在**（API 404） | [api.github.com/repos/corkami/pocs](https://api.github.com/repos/corkami/pocs) |
-| 2016-12-01 | PortSwigger (Gareth Heyes) "Bypassing CSP using polyglot JPEGs" | [portswigger.net](https://portswigger.net/research/bypassing-csp-using-polyglot-jpegs) |
-| 2019-07-10 | `ansemjo/truepolyglot` GitHub 仓库建立（PDF+ZIP polyglot 生成器） | [api.github.com/repos/ansemjo/truepolyglot](https://api.github.com/repos/ansemjo/truepolyglot) |
-| 2022-03-15 / 2022-08-04 | Koch et al. arXiv 2203.07561 "Toward the Detection of Polyglot Files"（PNNL） | [arXiv](https://arxiv.org/abs/2203.07561), [doi.org](https://doi.org/10.1145/3546096.3546106) |
-| 2024-05-27 | `gildas-lormeau/Polyglot-HTML-ZIP-PNG`（SingleFile 作者；HTML/ZIP/PNG 多格式教程+生成器） | [api.github.com/repos/gildas-lormeau/Polyglot-HTML-ZIP-PNG](https://api.github.com/repos/gildas-lormeau/Polyglot-HTML-ZIP-PNG) |
-| 2024-07 | Koch et al. arXiv 2407.01529 "Where the Polyglots Are" | [arXiv](https://arxiv.org/abs/2407.01529) |
+| 日期                    | 公开披露内容                                                                                                                                                                                                                 | 来源                                                                                                                                                                                                                                                                                                                            |
+| ----------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 1989-02-01              | PKZIP 0.90 发布，ZIP 格式诞生                                                                                                                                                                                                | [fileformats.archiveteam.org](http://fileformats.archiveteam.org/wiki/PKZIP)                                                                                                                                                                                                                                                    |
+| 1989-07-21              | PKZIP 1.01/1.02 引入 MAKESFX.COM → PKSFX.PRG 自解压 EXE（可执行 stub + ZIP overlay）                                                                                                                                         | [justsolve.archiveteam.org](http://justsolve.archiveteam.org/wiki/Self-extracting_ZIP)                                                                                                                                                                                                                                          |
+| 1990-03-15              | PKZIP 1.10 新增 2934 字节 mini-PKSFX，不再需要 PKSFX.PRG                                                                                                                                                                     | [files.mpoli.fi](https://files.mpoli.fi/unpacked/software/misc/pj2/pkz110.exe/whatsnew.110)                                                                                                                                                                                                                                     |
+| 1990-05                 | Info-ZIP UnZip 3.0 首发，附 `unzipsfx`（自解压 stub for prepending to ZIP archives）                                                                                                                                         | [infozip.sourceforge.net](https://infozip.sourceforge.net/Info-ZIP2.html), [man.archlinux.org](https://man.archlinux.org/man/unzipsfx.1.en.raw)                                                                                                                                                                                 |
+| **2001-11-08/12**       | **vuln-dev 邮件组线程 "Infected jpeg files?"**：Pete Simpson 发帖 `copy apic.jpg + bo2k.zip bo2k.jpg /b` —— JPEG 正常显示，WinZip 可打开附加的 ZIP；帖子称该技巧"已用于伪装盗版软件已久"。**这是能找到的最早书面公开记录**。 | [seclists.org/vuln-dev/2001/Nov/107](https://seclists.org/vuln-dev/2001/Nov/107)                                                                                                                                                                                                                                                |
+| 2006-10-16/17           | Terminally Incoherent "Poor Man's Steganography"；Lifehacker "Hide files in JPEG images"，大众化传播 `cat / copy /b` 技巧                                                                                                    | [terminally-incoherent.com](https://www.terminally-incoherent.com/blog/2006/10/16/poor-mans-steganography/), [lifehacker.com](https://lifehacker.com/hide-files-in-jpeg-images-207905)                                                                                                                                          |
+| 2007-11                 | CERT VU#715737（Firefox `jar:` URI XSS）；gnucitizen (pdp) "Java JAR Attacks and Features" —— JAR 与图像的混合（"JPGAR"），先于 GIFAR                                                                                        | [gnucitizen.org](https://www.gnucitizen.org/blog/java-jar-attacks-and-features/), [kb.cert.org VU#715737](https://www.kb.cert.org/vuls/id/715737)                                                                                                                                                                               |
+| **2008-08-01/02**       | **GIFAR 公开**：InfoWorld、Ars Technica 率先报道；John Heasman 博客"On GIFARs"详细解释；Billy Rios & Nate McFeters 构建 GIF+JAR 攻击                                                                                         | [infoworld.com](https://www.infoworld.com/article/2653025/a-photo-that-can-steal-your-online-credentials.html), [arstechnica.com](https://arstechnica.com/information-technology/2008/08/newly-found-hybrid-attack-embeds-java-applet-in-gif-file/), [heasman.blogspot.com](http://heasman.blogspot.com/2008/08/on-gifars.html) |
+| **2008-08-06/07**       | **Black Hat USA 2008 Briefings**："Extreme Client-Side Exploitation"（McFeters, Carter, Heasman）正式演讲 GIFAR                                                                                                              | [Black Hat schedule](https://blackhat.com/html/bh-usa-08/bh-usa-08-schedule.html), [slides PDF](https://blackhat.com/presentations/bh-usa-08/McFeters_Carter_Heasman/BH_US_08_Mcfeters_Carter_Heasman_Extreme_Client-Side_Exploitation.pdf)                                                                                     |
+| 2008-12-03/05           | Sun Alert 244988 + CVE-2008-5343 修复 GIFAR                                                                                                                                                                                  | [Oracle Sun Alert 1019738.1](https://download.oracle.com/sunalerts/1019738.1.html), [NVD CVE-2008-5343](https://nvd.nist.gov/vuln/detail/CVE-2008-5343)                                                                                                                                                                         |
+| 2010                    | Sundareswaran & Squicciarini, "Image repurposing for Gifar-based attacks"（CEAS 会议）                                                                                                                                       | [CiteSeerX](http://citeseerx.ist.psu.edu/viewdoc/summary?doi=10.1.1.297.4607)                                                                                                                                                                                                                                                   |
+| 2013-06-05              | **SSTIC 2013** Ange Albertini "Polyglottes binaires et implications"（PE/Java/HTML/PDF/ZIP）                                                                                                                                 | [sstic.org](https://www.sstic.org/2013/presentation/polyglottes_binaires_et_implications/)                                                                                                                                                                                                                                      |
+| 2013-11                 | **ACM CCS 2013** Magazinius, Rios, Sabelfeld "Polyglots: Crossing Origins by Crossing Formats"（首篇学术 polyglot 论文）                                                                                                     | [ACM DL](https://dl.acm.org/doi/10.1145/2508859.2516685)                                                                                                                                                                                                                                                                        |
+| 2014-06                 | PoC                                                                                                                                                                                                                          |                                                                                                                                                                                                                                                                                                                                 | GTFO 0x04 "How to Manually Attach a File to a PDF"                                                                              | [mcfp.felk.cvut.cz](https://mcfp.felk.cvut.cz/publicDatasets/pocorgtfo/contents/articles/04-12.pdf) |
+| 2014-11                 | PoC                                                                                                                                                                                                                          |                                                                                                                                                                                                                                                                                                                                 | GTFO 0x06 "This TAR archive is a PDF! (as well as a ZIP…)"                                                                      | [mcfp.felk.cvut.cz](https://mcfp.felk.cvut.cz/publicDatasets/pocorgtfo/contents/articles/06-04.pdf) |
+| 2014-12-29              | **31C3** Ange Albertini "Funky File Formats"                                                                                                                                                                                 | [media.ccc.de](https://media.ccc.de/v/31c3_-_5930_-_en_-_saal_6_-_201412291400_-_funky_file_formats_-_ange_albertini)                                                                                                                                                                                                           |
+| **2015-03**             | **PoC                                                                                                                                                                                                                        |                                                                                                                                                                                                                                                                                                                                 | GTFO 0x07** 第 6 篇文章 "Abusing file formats; or, Corkami, the Novella"（Ange Albertini）；README 称 truepolyglot 工具"See POC |                                                                                                     | GTFO 07"。**注意：0x07 中没有名为 "True Polyglot" 的文章，该名称不存在。** | [pocorgtfo.reilly.io](https://pocorgtfo.reilly.io/), [mcfp.felk.cvut.cz](https://mcfp.felk.cvut.cz/publicDatasets/pocorgtfo/contents/articles/07-06.pdf) |
+| 2015-03-26              | GitHub 仓库 `corkami/pocs` 建立（含 `poly/` 目录下的多格式 PoC）；`corkami/polyglot` **不存在**（API 404）                                                                                                                   | [api.github.com/repos/corkami/pocs](https://api.github.com/repos/corkami/pocs)                                                                                                                                                                                                                                                  |
+| 2016-12-01              | PortSwigger (Gareth Heyes) "Bypassing CSP using polyglot JPEGs"                                                                                                                                                              | [portswigger.net](https://portswigger.net/research/bypassing-csp-using-polyglot-jpegs)                                                                                                                                                                                                                                          |
+| 2019-07-10              | `ansemjo/truepolyglot` GitHub 仓库建立（PDF+ZIP polyglot 生成器）                                                                                                                                                            | [api.github.com/repos/ansemjo/truepolyglot](https://api.github.com/repos/ansemjo/truepolyglot)                                                                                                                                                                                                                                  |
+| 2022-03-15 / 2022-08-04 | Koch et al. arXiv 2203.07561 "Toward the Detection of Polyglot Files"（PNNL）                                                                                                                                                | [arXiv](https://arxiv.org/abs/2203.07561), [doi.org](https://doi.org/10.1145/3546096.3546106)                                                                                                                                                                                                                                   |
+| 2024-05-27              | `gildas-lormeau/Polyglot-HTML-ZIP-PNG`（SingleFile 作者；HTML/ZIP/PNG 多格式教程+生成器）                                                                                                                                    | [api.github.com/repos/gildas-lormeau/Polyglot-HTML-ZIP-PNG](https://api.github.com/repos/gildas-lormeau/Polyglot-HTML-ZIP-PNG)                                                                                                                                                                                                  |
+| 2024-07                 | Koch et al. arXiv 2407.01529 "Where the Polyglots Are"                                                                                                                                                                       | [arXiv](https://arxiv.org/abs/2407.01529)                                                                                                                                                                                                                                                                                       |
 
 **结论**：最关键的 prior art 是 **2001-11 的 vuln-dev 邮件帖**（`copy apic.jpg + bo2k.zip bo2k.jpg /b`），距今已超过 20 年。所有已检索到的专利的申请日（2009、2012、2015、2018、2019、2020）均在该 prior art 之后。
 
@@ -181,6 +184,7 @@ McAfee 的 US11386205（申请 2019-01-14，授权 2022-07-12）的说明书摘�
 - **对本技术的判断**：单纯的"把 ZIP 数据拼到图像文件后面"属于通用计算机操作，缺少"改善计算机功能"的具体技术手段，大概率会在 Step 2A 被认定为抽象思想，Step 2B 也难通过。但若权利要求限定了一套**具体的偏移重定位算法、中央目录偏移修正机制、图像解码器跳过策略**，并有实验数据证明"标准解码器无需修改即可同时解读"，则有可能通过 Enfish/McRO 路径。
 
 **参考**：
+
 - [Alice Corp. v. CLS Bank](https://www.law.cornell.edu/supremecourt/text/13-298)
 - [MPEP § 2106 (Nov 2024)](https://www.bitlaw.com/source/mpep/2106.html)
 
@@ -194,6 +198,7 @@ McAfee 的 US11386205（申请 2019-01-14，授权 2022-07-12）的说明书摘�
 - **但 prior art 是更直接的问题**：CNIPA 审查中新颖性/创造性判断严格参照现有技术，2001 年的邮件组帖子、2008 年的 GIFAR 公开、2013-2015 年的学术论文都已构成充分的 prior art。即便权利要求措辞严谨，也极难通过创造性审查。
 
 **参考**：
+
 - [CNIPA 英文版《涉及计算机程序的发明专利申请审查指南》](https://english.cnipa.gov.cn/transfer/patentexamination/referencematerials/970008.htm)
 - [CNIPA 2023 审查指南修改解读（2024-01-18）](https://www.cnipa.gov.cn/art/2024/1/18/art_2199_189877.html)
 
@@ -208,6 +213,7 @@ McAfee 的 US11386205（申请 2019-01-14，授权 2022-07-12）的说明书摘�
 - **McAfee US11386205 的检测专利**（EPO 同族若存在）更可能通过，因为检测恶意文件属于明确的技术领域。
 
 **参考**：
+
 - EPO Guidelines G-II, 3.6 (via search index): [https://www.epo.org/en/legal/guidelines-epc/2025/g_ii_3_6_1.html](https://www.epo.org/en/legal/guidelines-epc/2025/g_ii_3_6_1.html)（403，仅索引命中）
 - Comvik T 641/00 (via search index): [https://www.epo.org/en/legal/case-law/2025/clr_i_d_9_2_1.html](https://www.epo.org/en/legal/case-law/2025/clr_i_d_9_2_1.html)（403，仅索引命中）
 
@@ -228,6 +234,7 @@ McAfee 的 US11386205（申请 2019-01-14，授权 2022-07-12）的说明书摘�
 ## 参考来源
 
 ### 专利
+
 - [US8271544B2 — Data file having more than one mode of operation (Creative Technology)](https://exa.ai/library/legal/patent/kj2vzgr8mvw2g5d7bldckt)
 - [US9009123B2 / US10972746B2 — Method of combining image files and other files (Shuttersong)](https://trea.com/information/method-of-combining-image-files-and-other-files/patentgrant/0187060f-4496-4436-9e84-d65c381c7289)
 - [US11386205B2 — Detection of malicious polyglot files (McAfee)](https://exa.ai/library/legal/patent/v7zkzs63b3hgrm8jhy7gyh)
@@ -236,6 +243,7 @@ McAfee 的 US11386205（申请 2019-01-14，授权 2022-07-12）的说明书摘�
 - [CN105354219A — 一种文件编码方法及装置 (Nubia)](https://www.xjishu.com/zhuanli/55/CN105354219.html)
 
 ### 公开披露（Prior Art）
+
 - [vuln-dev 2001-11 "Infected jpeg files?"](https://seclists.org/vuln-dev/2001/Nov/107) — 最早书面记录
 - [Lifehacker 2006-10 "Hide files in JPEG images"](https://lifehacker.com/hide-files-in-jpeg-images-207905)
 - [Terminally Incoherent 2006-10-16 "Poor Man's Steganography"](https://www.terminally-incoherent.com/blog/2006/10/16/poor-mans-steganography/)
@@ -254,6 +262,7 @@ McAfee 的 US11386205（申请 2019-01-14，授权 2022-07-12）的说明书摘�
 - [arXiv 2203.07561 / 2407.01529 (Koch et al.)](https://arxiv.org/abs/2407.01529)
 
 ### 法律与审查指南
+
 - [Alice Corp. v. CLS Bank Int'l, 573 U.S. 208 (2014)](https://www.law.cornell.edu/supremecourt/text/13-298)
 - [MPEP § 2106 (November 2024) — Patent Subject Matter Eligibility](https://www.bitlaw.com/source/mpep/2106.html)
 - [CNIPA — Examination Practices on the Invention Applications Relating to Computer Programs (English)](https://english.cnipa.gov.cn/transfer/patentexamination/referencematerials/970008.htm)
@@ -263,8 +272,8 @@ McAfee 的 US11386205（申请 2019-01-14，授权 2022-07-12）的说明书摘�
 - [PKZIP history (fileformats.archiveteam.org)](http://fileformats.archiveteam.org/wiki/PKZIP)
 - [Just Solve — Self-extracting ZIP](http://justsolve.archiveteam.org/wiki/Self-extracting_ZIP)
 - [Info-ZIP history](https://infozip.sourceforge.net/Info-ZIP2.html)
-- [unzipsfx(1) man page (Venea)](https://www.venea.net/man/unzipsfx(1))
+- [unzipsfx(1) man page (Venea)](<https://www.venea.net/man/unzipsfx(1)>)
 
 ---
 
-*本报告基于截至 2026 年 9 月的网络检索，不构成法律意见。专利权利要求的解释、有效性判断与侵权分析应由执业律师或专利代理师基于官方原始文本作出。*
+_本报告基于截至 2026 年 9 月的网络检索，不构成法律意见。专利权利要求的解释、有效性判断与侵权分析应由执业律师或专利代理师基于官方原始文本作出。_
