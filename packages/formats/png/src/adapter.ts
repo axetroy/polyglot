@@ -1,5 +1,5 @@
-import type { BinarySource } from "@polyglot/binary";
-import { BufferSource, PathSource, readU32BE } from "@polyglot/binary";
+import type { BinarySource } from "@polyglot-img/binary";
+import { BufferSource, PathSource, readU32BE } from "@polyglot-img/binary";
 
 // PNG Signature: 89 50 4E 47 0D 0A 1A 0A
 const PNG_SIGNATURE = new Uint8Array([0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a]);

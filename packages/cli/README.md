@@ -1,4 +1,4 @@
-# @polyglot/cli
+# @polyglot-img/cli
 
 Polyglot 文件引擎的命令行入口，基于 [Commander.js](https://github.com/tj/commander.js)。
 
@@ -84,12 +84,12 @@ polyglot extract image.zip ./output/
 
 ## CLI 内部实现注意
 
-`@polyglot/cli` 直接 require 了 `@polyglot/sdk` 单例，所有命令共用同一份引擎状态。如需独立引擎，改用 `@polyglot/core` 自行构建。
+`@polyglot-img/cli` 直接 require 了 `@polyglot-img/sdk` 单例，所有命令共用同一份引擎状态。如需独立引擎，改用 `@polyglot-img/core` 自行构建。
 
 ## 开发
 
 ```bash
-npm run build -w @polyglot/cli
-npm run typecheck -w @polyglot/cli
+npm run build -w @polyglot-img/cli
+npm run typecheck -w @polyglot-img/cli
 npm test
 ```

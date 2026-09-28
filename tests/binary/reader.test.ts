@@ -6,7 +6,7 @@ import {
   readU8,
   readU16LE,
   readU32LE,
-} from "@polyglot/binary";
+} from "@polyglot-img/binary";
 
 describe("BinaryReader", () => {
   it("should read primitives", async () => {

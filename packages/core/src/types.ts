@@ -1,4 +1,4 @@
-import type { BinarySource, FrontAdapter, BackAdapter, ArchiveEntry } from "@polyglot/binary";
+import type { BinarySource, FrontAdapter, BackAdapter, ArchiveEntry } from "@polyglot-img/binary";
 
 export type FormatMode = "native" | "relocated" | "experimental" | "unsupported";
 

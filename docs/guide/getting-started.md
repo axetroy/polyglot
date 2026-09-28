@@ -12,13 +12,13 @@ Polyglot 文件是**同时符合两种格式规范**的单个文件。本项目�
 ## 安装
 
 ```bash
-npm install @polyglot/sdk
+npm install @polyglot-img/sdk
 ```
 
 或者使用 CLI：
 
 ```bash
-npm install -g @polyglot/cli
+npm install -g @polyglot-img/cli
 ```
 
 ## 快速上手
@@ -26,7 +26,7 @@ npm install -g @polyglot/cli
 ### 在代码中使用
 
 ```typescript
-import { polyglot } from "@polyglot/sdk";
+import { polyglot } from "@polyglot-img/sdk";
 
 // 合成：把 ZIP 归档藏进 PNG 图片
 const file = await polyglot.create({

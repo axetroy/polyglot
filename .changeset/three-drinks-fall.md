@@ -1,7 +1,7 @@
 ---
-"@polyglot/browser": minor
-"@polyglot/cli": minor
-"@polyglot/sdk": minor
+"@polyglot-img/browser": minor
+"@polyglot-img/cli": minor
+"@polyglot-img/sdk": minor
 ---
 
 release

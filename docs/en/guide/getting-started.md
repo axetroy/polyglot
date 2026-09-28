@@ -11,13 +11,13 @@ A polyglot file **simultaneously satisfies two format specifications**: in this 
 ## Installation
 
 ```bash
-npm install @polyglot/sdk
+npm install @polyglot-img/sdk
 ```
 
 Or use the CLI directly:
 
 ```bash
-npm install -g @polyglot/cli
+npm install -g @polyglot-img/cli
 ```
 
 ## Quick start
@@ -25,7 +25,7 @@ npm install -g @polyglot/cli
 ### In code
 
 ```typescript
-import { polyglot } from "@polyglot/sdk";
+import { polyglot } from "@polyglot-img/sdk";
 
 // Build: embed a ZIP archive inside a PNG image
 const file = await polyglot.create({

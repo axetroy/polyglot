@@ -1,7 +1,7 @@
 import { describe, it, expect } from "vitest";
-import { synthesize } from "@polyglot/browser";
-import { parseZip } from "@polyglot/formats-zip";
-import { BufferSource } from "@polyglot/binary";
+import { synthesize } from "@polyglot-img/browser";
+import { parseZip } from "@polyglot-img/formats-zip";
+import { BufferSource } from "@polyglot-img/binary";
 
 const enc = (s: string) => new TextEncoder().encode(s);
 
@@ -62,7 +62,7 @@ describe("polyglot ZIP parsing", () => {
   });
 
   it("parseZip still works on a standalone ZIP (no prefix)", async () => {
-    const { buildZip } = await import("@polyglot/formats-zip");
+    const { buildZip } = await import("@polyglot-img/formats-zip");
     const archive = buildZip([{ name: "standalone.txt", data: enc("data") }]);
     const parsed = await parseZip(new BufferSource(archive));
     expect(parsed.entries).toHaveLength(1);

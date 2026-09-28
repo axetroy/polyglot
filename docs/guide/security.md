@@ -20,7 +20,7 @@ ZIP entry "evil.txt" exceeds maximum size: 2147483648 > 1073741824
 ZIP archive total size exceeds limit: 1152921504606846976 > 1099511627776
 ```
 
-浏览器端的 `@polyglot/browser` 同样在 `synthesize()` 时校验这 3 个限制（通过 `enforceLimits`），合成大文件前就能发现超限而非等到读取。
+浏览器端的 `@polyglot-img/browser` 同样在 `synthesize()` 时校验这 3 个限制（通过 `enforceLimits`），合成大文件前就能发现超限而非等到读取。
 
 ## 路径穿越防护
 

@@ -1,17 +1,17 @@
-# `@polyglot/browser`
+# `@polyglot-img/browser`
 
 Pure-browser polyglot implementation — zero Node `Buffer` dependency.
 
 ## Why a separate package?
 
-The playground is a **Vue component inside a VitePress site** that must run entirely client-side. To keep it self-contained, `@polyglot/browser` ports the core polyglot algorithms from the Node packages into a single ESM bundle using only Web APIs (`Uint8Array`, `DataView`, `Blob`, `DecompressionStream`).
+The playground is a **Vue component inside a VitePress site** that must run entirely client-side. To keep it self-contained, `@polyglot-img/browser` ports the core polyglot algorithms from the Node packages into a single ESM bundle using only Web APIs (`Uint8Array`, `DataView`, `Blob`, `DecompressionStream`).
 
-| Node package             | Browser equivalent                                 |
-| ------------------------ | -------------------------------------------------- |
-| `@polyglot/formats-png`  | `crc32` + `png` + `bytes`                          |
-| `@polyglot/formats-jpeg` | `jpeg` (same SOF/EOI logic)                        |
-| `@polyglot/formats-zip`  | `zip` (build / relocate / list / extract)          |
-| `@polyglot/core/engine`  | `polyglot` module (synthesize / inspect / extract) |
+| Node package                 | Browser equivalent                                 |
+| ---------------------------- | -------------------------------------------------- |
+| `@polyglot-img/formats-png`  | `crc32` + `png` + `bytes`                          |
+| `@polyglot-img/formats-jpeg` | `jpeg` (same SOF/EOI logic)                        |
+| `@polyglot-img/formats-zip`  | `zip` (build / relocate / list / extract)          |
+| `@polyglot-img/core/engine`  | `polyglot` module (synthesize / inspect / extract) |
 
 ## API
 
@@ -28,7 +28,7 @@ import {
   isJpeg,
   parsePng,
   parseJpeg,
-} from "@polyglot/browser";
+} from "@polyglot-img/browser";
 ```
 
 See [API reference](/guide/api#polyglot-browser) for full signatures.
@@ -38,7 +38,7 @@ See [API reference](/guide/api#polyglot-browser) for full signatures.
 Same three caps as the Node engine:
 
 ```typescript
-import { DEFAULT_SECURITY_LIMITS } from "@polyglot/browser";
+import { DEFAULT_SECURITY_LIMITS } from "@polyglot-img/browser";
 
 // maxEntries: 10000
 // maxEntrySize: 1 GiB

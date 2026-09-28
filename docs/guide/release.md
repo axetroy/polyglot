@@ -1,17 +1,17 @@
 # 发布指南
 
-本文档说明如何将 `@polyglot/*` 包发布到 npm。整个流程由 CI 驱动，开发者只需创建一个 PR。
+本文档说明如何将 `@polyglot-img/*` 包发布到 npm。整个流程由 CI 驱动，开发者只需创建一个 PR。
 
 ## 可发布的包
 
-| 包                    | 发布？ | 说明           |
-| --------------------- | ------ | -------------- |
-| `@polyglot/sdk`       | ✅     | 主 SDK         |
-| `@polyglot/cli`       | ✅     | CLI 工具       |
-| `@polyglot/browser`   | ✅     | 浏览器 bundle  |
-| `@polyglot/binary`    | ❌     | 内部工具包     |
-| `@polyglot/core`      | ❌     | 内部引擎       |
-| `@polyglot/formats-*` | ❌     | 内部格式适配器 |
+| 包                        | 发布？ | 说明           |
+| ------------------------- | ------ | -------------- |
+| `@polyglot-img/sdk`       | ✅     | 主 SDK         |
+| `@polyglot-img/cli`       | ✅     | CLI 工具       |
+| `@polyglot-img/browser`   | ✅     | 浏览器 bundle  |
+| `@polyglot-img/binary`    | ❌     | 内部工具包     |
+| `@polyglot-img/core`      | ❌     | 内部引擎       |
+| `@polyglot-img/formats-*` | ❌     | 内部格式适配器 |
 
 只发布 3 个面向用户的包，其余作为内部依赖跟随 SDK 版本管理。
 
@@ -54,7 +54,7 @@ npx changeset
 
 交互式向导会询问：
 
-- **哪些包有变更？**（用空格选择 `@polyglot/sdk`、`@polyglot/cli`、`@polyglot/browser`）
+- **哪些包有变更？**（用空格选择 `@polyglot-img/sdk`、`@polyglot-img/cli`、`@polyglot-img/browser`）
 - **变更类型？**（`patch` 修复 / `minor` 新功能 / `major` 不兼容变更）
 - **changelog 描述**
 
@@ -80,7 +80,7 @@ npx changeset
 合并 Changesets 自动创建的版本 bump PR 到 `main`。触发发布：
 
 1. CI 构建所有包
-2. 发布 `@polyglot/sdk`、`@polyglot/cli`、`@polyglot/browser` 到 npm（带 provenance 签名）
+2. 发布 `@polyglot-img/sdk`、`@polyglot-img/cli`、`@polyglot-img/browser` 到 npm（带 provenance 签名）
 3. 创建 Git tag `vX.Y.Z`
 
 **全程无需人工干预。**
@@ -89,10 +89,10 @@ npx changeset
 
 ```bash
 # 查看版本历史
-npm view @polyglot/sdk versions
+npm view @polyglot-img/sdk versions
 
 # 确认 latest 标签
-npm view @polyglot/sdk dist-tags
+npm view @polyglot-img/sdk dist-tags
 
 # 查看 CI 运行记录
 gh run list --limit 3
@@ -139,6 +139,6 @@ npx changeset add
 
 ```json
 {
-  "ignore": ["@polyglot/cli"]
+  "ignore": ["@polyglot-img/cli"]
 }
 ```

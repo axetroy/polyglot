@@ -17,14 +17,14 @@
     "resolveJsonModule": true,
     "isolatedModules": true,
     "paths": {
-      "@polyglot/binary": ["./packages/binary/src"],
-      "@polyglot/core": ["./packages/core/src"],
-      "@polyglot/sdk": ["./packages/sdk/src"],
-      "@polyglot/cli": ["./packages/cli/src"],
-      "@polyglot/formats-png": ["./packages/formats/png/src"],
-      "@polyglot/formats-jpeg": ["./packages/formats/jpeg/src"],
-      "@polyglot/formats-zip": ["./packages/formats/zip/src"],
-      "@polyglot/browser": ["./packages/browser/src"]
+      "@polyglot-img/binary": ["./packages/binary/src"],
+      "@polyglot-img/core": ["./packages/core/src"],
+      "@polyglot-img/sdk": ["./packages/sdk/src"],
+      "@polyglot-img/cli": ["./packages/cli/src"],
+      "@polyglot-img/formats-png": ["./packages/formats/png/src"],
+      "@polyglot-img/formats-jpeg": ["./packages/formats/jpeg/src"],
+      "@polyglot-img/formats-zip": ["./packages/formats/zip/src"],
+      "@polyglot-img/browser": ["./packages/browser/src"]
     },
     "types": ["vitest/globals", "node"]
   },

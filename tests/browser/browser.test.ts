@@ -19,10 +19,10 @@ import {
   inspect,
   extract,
   DEFAULT_SECURITY_LIMITS,
-} from "@polyglot/browser";
+} from "@polyglot-img/browser";
 // Node-side parser used to cross-validate the browser implementation.
-import { parseZip } from "@polyglot/formats-zip";
-import { BufferSource } from "@polyglot/binary";
+import { parseZip } from "@polyglot-img/formats-zip";
+import { BufferSource } from "@polyglot-img/binary";
 
 // ── Fixture builders ──────────────────────────────────────
 const CRC_TABLE = (() => {

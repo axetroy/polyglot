@@ -2,21 +2,21 @@
 
 ## 包结构
 
-| 包名                     | 说明                                 |
-| ------------------------ | ------------------------------------ |
-| `@polyglot/sdk`          | 预配置好适配器的开箱即用入口（推荐） |
-| `@polyglot/core`         | 引擎核心：注册表、兼容性规则、检测器 |
-| `@polyglot/binary`       | 二进制源抽象（路径 / Buffer / 流）   |
-| `@polyglot/formats-png`  | PNG 前端适配器                       |
-| `@polyglot/formats-jpeg` | JPEG 前端适配器                      |
-| `@polyglot/formats-zip`  | ZIP 后端适配器                       |
-| `@polyglot/cli`          | 命令行工具                           |
-| `@polyglot/browser`      | 浏览器端纯 `Uint8Array` 实现         |
+| 包名                         | 说明                                 |
+| ---------------------------- | ------------------------------------ |
+| `@polyglot-img/sdk`          | 预配置好适配器的开箱即用入口（推荐） |
+| `@polyglot-img/core`         | 引擎核心：注册表、兼容性规则、检测器 |
+| `@polyglot-img/binary`       | 二进制源抽象（路径 / Buffer / 流）   |
+| `@polyglot-img/formats-png`  | PNG 前端适配器                       |
+| `@polyglot-img/formats-jpeg` | JPEG 前端适配器                      |
+| `@polyglot-img/formats-zip`  | ZIP 后端适配器                       |
+| `@polyglot-img/cli`          | 命令行工具                           |
+| `@polyglot-img/browser`      | 浏览器端纯 `Uint8Array` 实现         |
 
-## `@polyglot/sdk`
+## `@polyglot-img/sdk`
 
 ```typescript
-import { polyglot } from "@polyglot/sdk";
+import { polyglot } from "@polyglot-img/sdk";
 ```
 
 `sdk` 导出一个已注册 PNG、JPEG 适配器与 ZIP 后端适配器的 `PolyglotEngine` 实例。
@@ -113,14 +113,14 @@ await back.read("readme.txt"); // Buffer
 
 返回 `OpenBackResult`：`{ format, list(), read(name) }`。非 polyglot 文件会抛 `InvalidArchiveError`。
 
-## `@polyglot/core`
+## `@polyglot-img/core`
 
 需要自定义适配器时直接使用引擎：
 
 ```typescript
-import { PolyglotEngine } from "@polyglot/core";
-import { pngAdapter } from "@polyglot/formats-png";
-import { zipAdapter } from "@polyglot/formats-zip";
+import { PolyglotEngine } from "@polyglot-img/core";
+import { pngAdapter } from "@polyglot-img/formats-png";
+import { zipAdapter } from "@polyglot-img/formats-zip";
 
 const engine = new PolyglotEngine();
 
@@ -137,12 +137,12 @@ engine.registerCompatibility("png", "zip", true, "relocated");
 
 `mode` 取值：`'native'`、`'relocated'`、`'experimental'`、`'unsupported'`。
 
-## `@polyglot/browser`
+## `@polyglot-img/browser`
 
 浏览器端实现，纯 `Uint8Array`，无 Node 依赖。
 
 ```typescript
-import { synthesize, inspect, extract } from "@polyglot/browser";
+import { synthesize, inspect, extract } from "@polyglot-img/browser";
 
 const result = synthesize(pngBytes, {
   entries: [{ name: "a.txt", data: new TextEncoder().encode("hi") }],
@@ -183,7 +183,7 @@ const { front, entries } = await extract(fileBytes);
 ### 安全限制
 
 ```typescript
-import { DEFAULT_SECURITY_LIMITS } from "@polyglot/browser";
+import { DEFAULT_SECURITY_LIMITS } from "@polyglot-img/browser";
 
 DEFAULT_SECURITY_LIMITS.maxEntries; // 10000
 DEFAULT_SECURITY_LIMITS.maxEntrySize; // 1 GiB

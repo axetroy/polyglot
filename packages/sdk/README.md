@@ -1,20 +1,20 @@
-# @polyglot/sdk
+# @polyglot-img/sdk
 
 **推荐入口** — 开箱即用的预配置 Polyglot 引擎，已绑定 PNG / JPEG 前端与 ZIP 后端。
 
 ## 安装
 
 ```json
-{ "dependencies": { "@polyglot/sdk": "*" } }
+{ "dependencies": { "@polyglot-img/sdk": "*" } }
 ```
 
 ## 核心 API
 
 ```typescript
-import * as polyglot from "@polyglot/sdk";
+import * as polyglot from "@polyglot-img/sdk";
 ```
 
-所有接口均指向同一个单例 `PolyglotEngine`，对外暴露的类型与 `@polyglot/core` 一致。
+所有接口均指向同一个单例 `PolyglotEngine`，对外暴露的类型与 `@polyglot-img/core` 一致。
 
 ## 方法
 
@@ -96,16 +96,16 @@ const data = await archive.read("readme.txt"); // Buffer
 如果预配置的组合不够用，可导出底层引擎做扩展：
 
 ```typescript
-import { PolyglotEngine } from "@polyglot/sdk";
-// 注：当前 SDK 只导出 polyglot 单例；若要自定义引擎请改依赖 @polyglot/core。
+import { PolyglotEngine } from "@polyglot-img/sdk";
+// 注：当前 SDK 只导出 polyglot 单例；若要自定义引擎请改依赖 @polyglot-img/core。
 ```
 
-> **提示**：当前版本 `@polyglot/sdk` 导出的是单例。若需多实例（隔离状态、不同兼容规则），请改用 `@polyglot/core` 自行实例化。
+> **提示**：当前版本 `@polyglot-img/sdk` 导出的是单例。若需多实例（隔离状态、不同兼容规则），请改用 `@polyglot-img/core` 自行实例化。
 
 ## 开发
 
 ```bash
-npm run build -w @polyglot/sdk
-npm run typecheck -w @polyglot/sdk
+npm run build -w @polyglot-img/sdk
+npm run typecheck -w @polyglot-img/sdk
 npm test
 ```

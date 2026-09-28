@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { PathSource, BufferSource, readAll } from "@polyglot/binary";
+import { PathSource, BufferSource, readAll } from "@polyglot-img/binary";
 import { fileURLToPath } from "url";
 import { dirname, join } from "path";
 

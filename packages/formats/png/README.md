@@ -1,11 +1,11 @@
-# @polyglot/formats-png
+# @polyglot-img/formats-png
 
 PNG 前端格式适配器 — 检测、解析、校验与布局查询。
 
 ## 安装
 
 ```json
-{ "dependencies": { "@polyglot/formats-png": "*" } }
+{ "dependencies": { "@polyglot-img/formats-png": "*" } }
 ```
 
 ## 导出
@@ -17,12 +17,12 @@ import {
   PngChunk, // 类型定义
   PngInfo, // 类型定义
   PngLayout, // 类型定义
-} from "@polyglot/formats-png";
+} from "@polyglot-img/formats-png";
 ```
 
 ## `PngAdapter`
 
-实现 `@polyglot/binary.FrontAdapter`，`id` 为 `'png'`。
+实现 `@polyglot-img/binary.FrontAdapter`，`id` 为 `'png'`。
 
 ### `detect(source)` → `Promise<boolean>`
 
@@ -77,7 +77,7 @@ interface PngLayout {
 ## 开发
 
 ```bash
-npm run build -w @polyglot/formats-png
-npm run typecheck -w @polyglot/formats-png
+npm run build -w @polyglot-img/formats-png
+npm run typecheck -w @polyglot-img/formats-png
 npm test
 ```

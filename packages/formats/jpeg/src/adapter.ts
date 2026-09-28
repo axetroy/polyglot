@@ -1,5 +1,5 @@
-import type { BinarySource } from "@polyglot/binary";
-import { BufferSource, PathSource, readU16BE } from "@polyglot/binary";
+import type { BinarySource } from "@polyglot-img/binary";
+import { BufferSource, PathSource, readU16BE } from "@polyglot-img/binary";
 
 // JPEG SOI: FF D8
 const JPEG_SOI = new Uint8Array([0xff, 0xd8]);

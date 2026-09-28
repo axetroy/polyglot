@@ -16,15 +16,15 @@ image.zip      → [ JPEG ] + [ ZIP ]    (JPG 查看器正常显示，ZIP 工具
 
 ```
 ┌─────────────────────────────────────────────────────────────┐
-│                         SDK / CLI                          │
- ├──────────────┬──────────────────────────────────────────────┤
- │  PolyglotEngine │  Core  ·  Registry  ·  Detector          │
- ├──────────────┬──────────────┬───────────────────────────────┤
- │  Front Adapters  │  Back Adapters  │  Compatibility Engine   │
- │  PNG  ·  JPEG    │  ZIP              │  (security limits)     │
- ├──────────────────┴──────────────────┴─────────────────────────┤
- │  Binary Source (Path / Buffer / Stream)                        │
- └──────────────────────────────────────────────────────────────┘
+│                         SDK / CLI                           │
+├──────────────┬──────────────────────────────────────────────┤
+│  PolyglotEngine │  Core  ·  Registry  ·  Detector           │
+├──────────────┬──────────────┬───────────────────────────────┤
+│  Front Adapters  │  Back Adapters  │  Compatibility Engine  │
+│  PNG  ·  JPEG    │  ZIP              │  (security limits)   │
+├──────────────────┴──────────────────┴───────────────────────┤
+│  Binary Source (Path / Buffer / Stream)                     │
+└─────────────────────────────────────────────────────────────┘
 
   packages/
     browser/    ⚡ 纯浏览器端实现 (Uint8Array, 无 Node Buffer)
@@ -37,7 +37,7 @@ image.zip      → [ JPEG ] + [ ZIP ]    (JPG 查看器正常显示，ZIP 工具
       jpeg/     JPEG 前端适配器
       zip/      ZIP 后端适配器 (安全限制 · 偏移重定位)
   tests/
-    browser/    @polyglot/browser 交叉验证测试 (与 Node parser 对照)
+    browser/    @polyglot-img/browser 交叉验证测试 (与 Node parser 对照)
     binary/     BinarySource 单元测试
     zip/        ZIP 安全测试 (Zip Bomb · Path Traversal · maxEntries)
     compatibility/  兼容性单元测试 + 真实第三方工具解压验证
@@ -105,7 +105,7 @@ polyglot extract polyglot.png.zip ./output/
 ## SDK API
 
 ```typescript
-import * as polyglot from "@polyglot/sdk";
+import * as polyglot from "@polyglot-img/sdk";
 
 // 创建
 const file = await polyglot.polyglot.create({
@@ -154,7 +154,7 @@ const data = await archive.read("readme.txt");
 | **路径穿越** | `sanitizeEntryPath()` 拒绝 `..` 和绝对路径                     |
 | **异常处理** | JPEG 截断时优雅降级，不抛出                                    |
 | **CLI 安全** | extract 命令自动过滤危险路径                                   |
-| **浏览器端** | `@polyglot/browser` 同样强制执行三档安全上限                   |
+| **浏览器端** | `@polyglot-img/browser` 同样强制执行三档安全上限               |
 
 ## 运行测试
 

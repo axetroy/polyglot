@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { buildZip, relocateZipOffsets, parseZip } from "@polyglot/formats-zip";
+import { buildZip, relocateZipOffsets, parseZip } from "@polyglot-img/formats-zip";
 
 function makeSource(buf: Uint8Array) {
   return {

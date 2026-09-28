@@ -75,9 +75,9 @@ jobs:
       #               OIDC context — no extra env vars required.
       # NPM_TOKEN: set once by repo owner via `npm login`; stored as GitHub secret.
       - run: |
-          npm publish -w @polyglot/sdk     --provenance --access public
-          npm publish -w @polyglot/cli     --provenance --access public
-          npm publish -w @polyglot/browser --provenance --access public
+          npm publish -w @polyglot-img/sdk     --provenance --access public
+          npm publish -w @polyglot-img/cli     --provenance --access public
+          npm publish -w @polyglot-img/browser --provenance --access public
         env:
           NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
 

@@ -20,7 +20,7 @@ ZIP entry "evil.txt" exceeds maximum size: 2147483648 > 1073741824
 ZIP archive total size exceeds limit: 1152921504606846976 > 1099511627776
 ```
 
-The browser-side `@polyglot/browser` enforces the same three caps during `synthesize()`, catching oversized payloads before the file is even built.
+The browser-side `@polyglot-img/browser` enforces the same three caps during `synthesize()`, catching oversized payloads before the file is even built.
 
 ## Path-traversal defense
 

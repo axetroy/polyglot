@@ -1,4 +1,4 @@
-import type { BinarySource } from "@polyglot/binary";
+import type { BinarySource } from "@polyglot-img/binary";
 import { FormatRegistry } from "./registry.js";
 
 import type { DetectionResult, PolyglotInfo } from "./types.js";

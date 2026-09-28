@@ -5,10 +5,10 @@ import {
   type DetectionResult,
   type OpenFrontResult,
   type OpenBackResult,
-} from "@polyglot/core";
-import { pngAdapter } from "@polyglot/formats-png";
-import { jpegAdapter } from "@polyglot/formats-jpeg";
-import { zipAdapter } from "@polyglot/formats-zip";
+} from "@polyglot-img/core";
+import { pngAdapter } from "@polyglot-img/formats-png";
+import { jpegAdapter } from "@polyglot-img/formats-jpeg";
+import { zipAdapter } from "@polyglot-img/formats-zip";
 
 const engine = new PolyglotEngine();
 

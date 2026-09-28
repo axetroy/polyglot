@@ -1,6 +1,6 @@
 import { Command } from "commander";
 import { dirname, join } from "path";
-import * as polyglot from "@polyglot/sdk";
+import * as polyglot from "@polyglot-img/sdk";
 
 const program = new Command();
 

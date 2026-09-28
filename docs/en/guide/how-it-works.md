@@ -107,7 +107,7 @@ The reader layer applies multiple caps to guard against malicious payloads — s
 
 ## Browser-side implementation
 
-`@polyglot/browser` ports the same algorithms to pure `Uint8Array` — no Node `Buffer` dependency:
+`@polyglot-img/browser` ports the same algorithms to pure `Uint8Array` — no Node `Buffer` dependency:
 
 - CRC-32 uses a table built once at module load time
 - PNG / JPEG parsers operate directly on `Uint8Array` with `DataView`

@@ -1,9 +1,9 @@
 import { describe, it, expect } from "vitest";
-import { Detector } from "@polyglot/core";
-import { FormatRegistry } from "@polyglot/core";
-import { pngAdapter } from "@polyglot/formats-png";
-import { jpegAdapter } from "@polyglot/formats-jpeg";
-import { zipAdapter } from "@polyglot/formats-zip";
+import { Detector } from "@polyglot-img/core";
+import { FormatRegistry } from "@polyglot-img/core";
+import { pngAdapter } from "@polyglot-img/formats-png";
+import { jpegAdapter } from "@polyglot-img/formats-jpeg";
+import { zipAdapter } from "@polyglot-img/formats-zip";
 
 function createMinimalPNG(): Buffer {
   const sig = Buffer.from([0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a]);
@@ -114,7 +114,7 @@ describe("Detector", () => {
 
   it("should detect polyglot PNG+ZIP", async () => {
     const png = createMinimalPNG();
-    const { buildZip, relocateZipOffsets } = await import("@polyglot/formats-zip");
+    const { buildZip, relocateZipOffsets } = await import("@polyglot-img/formats-zip");
     const zip = buildZip([{ name: "test.txt", data: Buffer.from("test") }]);
     const relocated = relocateZipOffsets(zip, png.length);
     const polyglot = Buffer.concat([png, relocated]);
@@ -128,7 +128,7 @@ describe("Detector", () => {
 
   it("should detect polyglot JPEG+ZIP", async () => {
     const jpeg = createMinimalJPEG();
-    const { buildZip, relocateZipOffsets } = await import("@polyglot/formats-zip");
+    const { buildZip, relocateZipOffsets } = await import("@polyglot-img/formats-zip");
     const zip = buildZip([{ name: "test.txt", data: Buffer.from("test") }]);
     const relocated = relocateZipOffsets(zip, jpeg.length);
     const polyglot = Buffer.concat([jpeg, relocated]);
@@ -167,7 +167,7 @@ describe("Detector inspect", () => {
 
   it("should return PolyglotInfo for polyglot file", async () => {
     const png = createMinimalPNG();
-    const { buildZip, relocateZipOffsets } = await import("@polyglot/formats-zip");
+    const { buildZip, relocateZipOffsets } = await import("@polyglot-img/formats-zip");
     const zip = buildZip([{ name: "a.txt", data: Buffer.from("aaa") }]);
     const relocated = relocateZipOffsets(zip, png.length);
     const polyglot = Buffer.concat([png, relocated]);

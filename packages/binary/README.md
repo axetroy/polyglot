@@ -1,4 +1,4 @@
-# @polyglot/binary
+# @polyglot-img/binary
 
 底层二进制 I/O 抽象层 — 统一的读取源、读写器，以及所有格式适配器共享的接口契约。
 
@@ -7,7 +7,7 @@
 本包是 monorepo 内部包（`private: true`），通过 npm workspaces 直接引用：
 
 ```json
-{ "dependencies": { "@polyglot/binary": "*" } }
+{ "dependencies": { "@polyglot-img/binary": "*" } }
 ```
 
 ## 核心概念：`BinarySource`
@@ -31,7 +31,7 @@ interface BinarySource {
 | `StreamSource` | 网络流 / `Readable`    | ⚠️ 首次读取时缓冲 |
 
 ```typescript
-import { PathSource, BufferSource, StreamSource, toSource, readAll } from "@polyglot/binary";
+import { PathSource, BufferSource, StreamSource, toSource, readAll } from "@polyglot-img/binary";
 
 const a = new PathSource("./image.png");
 const b = new BufferSource(buf);
@@ -49,7 +49,7 @@ const all = await readAll(src);
 游标式顺序读写，避免手工计算偏移：
 
 ```typescript
-import { BinaryReader, BinaryWriter } from "@polyglot/binary";
+import { BinaryReader, BinaryWriter } from "@polyglot-img/binary";
 
 const reader = new BinaryReader(source);
 await reader.readUInt32LE(); // 读 4 字节小端，游标自动前进
@@ -69,7 +69,7 @@ const out = writer.getBuffer();
 
 ## 适配器接口契约
 
-`FrontAdapter` / `BackAdapter` / `ArchiveEntry` 均在此定义，供 `@polyglot/core` 与各格式包实现：
+`FrontAdapter` / `BackAdapter` / `ArchiveEntry` 均在此定义，供 `@polyglot-img/core` 与各格式包实现：
 
 ```typescript
 interface FrontAdapter {
@@ -95,12 +95,12 @@ interface ArchiveEntry {
 
 ## 依赖关系
 
-无外部依赖。位于依赖图最底层，被所有其它 `@polyglot/*` 包引用。
+无外部依赖。位于依赖图最底层，被所有其它 `@polyglot-img/*` 包引用。
 
 ## 开发
 
 ```bash
-npm run build -w @polyglot/binary    # tsup → dist (ESM + dts)
-npm run typecheck -w @polyglot/binary
+npm run build -w @polyglot-img/binary    # tsup → dist (ESM + dts)
+npm run typecheck -w @polyglot-img/binary
 npm test                              # 根目录，覆盖 tests/binary/
 ```

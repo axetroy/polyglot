@@ -2,21 +2,21 @@
 
 ## Package layout
 
-| Package                  | Purpose                                              |
-| ------------------------ | ---------------------------------------------------- |
-| `@polyglot/sdk`          | Pre-registered adapter entry point (recommended)     |
-| `@polyglot/core`         | Engine core: registry, compatibility rules, detector |
-| `@polyglot/binary`       | Binary source abstraction (path / Buffer / stream)   |
-| `@polyglot/formats-png`  | PNG front-end adapter                                |
-| `@polyglot/formats-jpeg` | JPEG front-end adapter                               |
-| `@polyglot/formats-zip`  | ZIP back-end adapter                                 |
-| `@polyglot/cli`          | CLI tooling                                          |
-| `@polyglot/browser`      | Browser-side pure Uint8Array implementation          |
+| Package                      | Purpose                                              |
+| ---------------------------- | ---------------------------------------------------- |
+| `@polyglot-img/sdk`          | Pre-registered adapter entry point (recommended)     |
+| `@polyglot-img/core`         | Engine core: registry, compatibility rules, detector |
+| `@polyglot-img/binary`       | Binary source abstraction (path / Buffer / stream)   |
+| `@polyglot-img/formats-png`  | PNG front-end adapter                                |
+| `@polyglot-img/formats-jpeg` | JPEG front-end adapter                               |
+| `@polyglot-img/formats-zip`  | ZIP back-end adapter                                 |
+| `@polyglot-img/cli`          | CLI tooling                                          |
+| `@polyglot-img/browser`      | Browser-side pure Uint8Array implementation          |
 
-## `@polyglot/sdk`
+## `@polyglot-img/sdk`
 
 ```typescript
-import { polyglot } from "@polyglot/sdk";
+import { polyglot } from "@polyglot-img/sdk";
 ```
 
 `sdk` exports a `PolyglotEngine` instance pre-registered with PNG, JPEG, and ZIP adapters.
@@ -113,14 +113,14 @@ await back.read("readme.txt"); // Buffer
 
 Returns `OpenBackResult`: `{ format, list(), read(name) }`. Throws `InvalidArchiveError` for non-polyglot files.
 
-## `@polyglot/core`
+## `@polyglot-img/core`
 
 Use the engine directly when custom adapters are needed:
 
 ```typescript
-import { PolyglotEngine } from "@polyglot/core";
-import { pngAdapter } from "@polyglot/formats-png";
-import { zipAdapter } from "@polyglot/formats-zip";
+import { PolyglotEngine } from "@polyglot-img/core";
+import { pngAdapter } from "@polyglot-img/formats-png";
+import { zipAdapter } from "@polyglot-img/formats-zip";
 
 const engine = new PolyglotEngine();
 
@@ -137,12 +137,12 @@ engine.registerCompatibility("png", "zip", true, "relocated");
 
 `mode` values: `'native'`, `'relocated'`, `'experimental'`, `'unsupported'`.
 
-## `@polyglot/browser`
+## `@polyglot-img/browser`
 
 Browser-side API — pure `Uint8Array`, no Node dependency.
 
 ```typescript
-import { synthesize, inspect, extract } from "@polyglot/browser";
+import { synthesize, inspect, extract } from "@polyglot-img/browser";
 
 const result = synthesize(pngBytes, {
   entries: [{ name: "a.txt", data: new TextEncoder().encode("hi") }],
@@ -183,7 +183,7 @@ const { front, entries } = await extract(fileBytes);
 ### Security limits
 
 ```typescript
-import { DEFAULT_SECURITY_LIMITS } from "@polyglot/browser";
+import { DEFAULT_SECURITY_LIMITS } from "@polyglot-img/browser";
 
 DEFAULT_SECURITY_LIMITS.maxEntries; // 10000
 DEFAULT_SECURITY_LIMITS.maxEntrySize; // 1 GiB

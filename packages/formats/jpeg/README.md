@@ -1,11 +1,11 @@
-# @polyglot/formats-jpeg
+# @polyglot-img/formats-jpeg
 
 JPEG 前端格式适配器 — SOI/EOI 定位、段解析、布局查询。
 
 ## 安装
 
 ```json
-{ "dependencies": { "@polyglot/formats-jpeg": "*" } }
+{ "dependencies": { "@polyglot-img/formats-jpeg": "*" } }
 ```
 
 ## 导出
@@ -17,12 +17,12 @@ import {
   JpegSegment, // 类型定义
   JpegInfo, // 类型定义
   JpegLayout, // 类型定义
-} from "@polyglot/formats-jpeg";
+} from "@polyglot-img/formats-jpeg";
 ```
 
 ## `JpegAdapter`
 
-实现 `@polyglot/binary.FrontAdapter`，`id` 为 `'jpeg'`。
+实现 `@polyglot-img/binary.FrontAdapter`，`id` 为 `'jpeg'`。
 
 ### `detect(source)` → `Promise<boolean>`
 
@@ -71,7 +71,7 @@ interface JpegLayout {
 ## 开发
 
 ```bash
-npm run build -w @polyglot/formats-jpeg
-npm run typecheck -w @polyglot/formats-jpeg
+npm run build -w @polyglot-img/formats-jpeg
+npm run typecheck -w @polyglot-img/formats-jpeg
 npm test
 ```

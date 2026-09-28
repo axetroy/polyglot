@@ -6,7 +6,7 @@ import {
   alloc,
   concat,
   fromString,
-} from "@polyglot/binary";
+} from "@polyglot-img/binary";
 import { ZIP_CENTRAL_DIR_SIG, ZIP_EOCD_SIG, ZIP_LOCAL_FILE_HEADER_SIG } from "./constants.js";
 
 export interface ZipEntryData {

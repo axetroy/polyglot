@@ -4,10 +4,10 @@ import {
   IncompatibleFormatError,
   InvalidFrontError,
   InvalidArchiveError,
-} from "@polyglot/core";
-import { pngAdapter } from "@polyglot/formats-png";
-import { jpegAdapter } from "@polyglot/formats-jpeg";
-import { zipAdapter } from "@polyglot/formats-zip";
+} from "@polyglot-img/core";
+import { pngAdapter } from "@polyglot-img/formats-png";
+import { jpegAdapter } from "@polyglot-img/formats-jpeg";
+import { zipAdapter } from "@polyglot-img/formats-zip";
 import { writeFileSync, mkdirSync } from "fs";
 import { join } from "path";
 
@@ -161,7 +161,7 @@ describe("Engine error paths", () => {
     const png = makeMinimalPNG();
     writeFileSync(join(TEST_DIR, "test.png"), png);
 
-    const { buildZip, relocateZipOffsets } = await import("@polyglot/formats-zip");
+    const { buildZip, relocateZipOffsets } = await import("@polyglot-img/formats-zip");
     const zip = buildZip([{ name: "a.txt", data: Buffer.from("a") }]);
     const relocated = relocateZipOffsets(zip, png.length);
     const polyglot = Buffer.concat([png, relocated]);
@@ -175,7 +175,7 @@ describe("Engine error paths", () => {
 
 describe("PNG validate edge cases", () => {
   it("validate() returns false when IEND chunk is missing", async () => {
-    const { PngAdapter } = await import("@polyglot/formats-png");
+    const { PngAdapter } = await import("@polyglot-img/formats-png");
     const adapter = new PngAdapter();
 
     // PNG with IHDR + IDAT but no IEND
@@ -193,7 +193,7 @@ describe("PNG validate edge cases", () => {
   });
 
   it("validate() returns true for valid minimal PNG", async () => {
-    const { PngAdapter } = await import("@polyglot/formats-png");
+    const { PngAdapter } = await import("@polyglot-img/formats-png");
     const adapter = new PngAdapter();
     const png = makeMinimalPNG();
 
@@ -207,7 +207,7 @@ describe("PNG validate edge cases", () => {
 
 describe("JPEG validate edge cases", () => {
   it("validate() returns false when EOI is missing", async () => {
-    const { JpegAdapter } = await import("@polyglot/formats-jpeg");
+    const { JpegAdapter } = await import("@polyglot-img/formats-jpeg");
     const adapter = new JpegAdapter();
 
     // JPEG with SOI + SOF but no EOI
@@ -226,7 +226,7 @@ describe("JPEG validate edge cases", () => {
   });
 
   it("validate() returns false for non-JPEG data", async () => {
-    const { JpegAdapter } = await import("@polyglot/formats-jpeg");
+    const { JpegAdapter } = await import("@polyglot-img/formats-jpeg");
     const adapter = new JpegAdapter();
 
     const result = await adapter.validate({
@@ -237,7 +237,7 @@ describe("JPEG validate edge cases", () => {
   });
 
   it("detect() returns false for non-JPEG data", async () => {
-    const { JpegAdapter } = await import("@polyglot/formats-jpeg");
+    const { JpegAdapter } = await import("@polyglot-img/formats-jpeg");
     const adapter = new JpegAdapter();
 
     const detected = await adapter.detect({
@@ -269,14 +269,14 @@ describe("Detector inspect on plain JPEG", () => {
 
 describe("ZIP relocate edge cases", () => {
   it("relocateZipOffsets returns unchanged buffer when adjustment is 0", async () => {
-    const { buildZip, relocateZipOffsets } = await import("@polyglot/formats-zip");
+    const { buildZip, relocateZipOffsets } = await import("@polyglot-img/formats-zip");
     const zip = buildZip([{ name: "a.txt", data: Buffer.from("a") }]);
     const result = relocateZipOffsets(zip, 0);
     expect(result).toBe(zip); // same reference (early return)
   });
 
   it("relocateZipOffsets throws on invalid ZIP without EOCD", async () => {
-    const { relocateZipOffsets } = await import("@polyglot/formats-zip");
+    const { relocateZipOffsets } = await import("@polyglot-img/formats-zip");
     expect(() => relocateZipOffsets(Buffer.from([0x00, 0x01, 0x02]), 10)).toThrow(
       /End of Central Directory/
     );

@@ -1,6 +1,6 @@
 import { describe, it, expect } from "vitest";
-import { buildZip, relocateZipOffsets, parseZip, findEocd } from "@polyglot/formats-zip";
-import { BufferSource } from "@polyglot/binary";
+import { buildZip, relocateZipOffsets, parseZip, findEocd } from "@polyglot-img/formats-zip";
+import { BufferSource } from "@polyglot-img/binary";
 
 describe("buildZip", () => {
   it("should create a valid ZIP archive", async () => {

@@ -1,4 +1,4 @@
-import { PathSource, type BinarySource } from "@polyglot/binary";
+import { PathSource, type BinarySource } from "@polyglot-img/binary";
 import { FormatRegistry } from "./registry.js";
 import { Detector } from "./detector.js";
 import {
@@ -67,11 +67,11 @@ export class PolyglotEngine {
     this.detector = new Detector(this.registry);
   }
 
-  registerFront(adapter: import("@polyglot/binary").FrontAdapter & { id: string }): void {
+  registerFront(adapter: import("@polyglot-img/binary").FrontAdapter & { id: string }): void {
     this.registry.registerFront(adapter);
   }
 
-  registerBack(adapter: import("@polyglot/binary").BackAdapter & { id: string }): void {
+  registerBack(adapter: import("@polyglot-img/binary").BackAdapter & { id: string }): void {
     this.registry.registerBack(adapter);
   }
 
@@ -234,7 +234,7 @@ export class PolyglotEngine {
 
   private async findFrontAdapter(
     source: BinarySource
-  ): Promise<import("@polyglot/binary").FrontAdapter | null> {
+  ): Promise<import("@polyglot-img/binary").FrontAdapter | null> {
     for (const adapter of this.registry.getAllFronts()) {
       if (await adapter.detect(source)) {
         return adapter;

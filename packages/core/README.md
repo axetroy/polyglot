@@ -1,19 +1,19 @@
-# @polyglot/core
+# @polyglot-img/core
 
 Polyglot 引擎核心 — 格式注册表、兼容性路由、格式探测、以及编排前端与后端适配器的 `PolyglotEngine`。
 
 ## 安装
 
 ```json
-{ "dependencies": { "@polyglot/core": "*" } }
+{ "dependencies": { "@polyglot-img/core": "*" } }
 ```
 
-通常不需要直接使用本包 — `@polyglot/sdk` 已预配置好 PNG/JPEG + ZIP。仅当需要注册自定义格式时直接依赖本包。
+通常不需要直接使用本包 — `@polyglot-img/sdk` 已预配置好 PNG/JPEG + ZIP。仅当需要注册自定义格式时直接依赖本包。
 
 ## `PolyglotEngine`
 
 ```typescript
-import { PolyglotEngine } from "@polyglot/core";
+import { PolyglotEngine } from "@polyglot-img/core";
 
 const engine = new PolyglotEngine();
 
@@ -76,7 +76,7 @@ const data = await archive.read("readme.txt");
 引擎内部的格式表，按 `id` 索引，兼容性规则以 `front:back` 为键。
 
 ```typescript
-import { FormatRegistry } from "@polyglot/core";
+import { FormatRegistry } from "@polyglot-img/core";
 
 const registry = new FormatRegistry();
 registry.registerFront(pngAdapter);
@@ -95,7 +95,7 @@ registry.getAllBacks(); // BackAdapter[]
 独立于注册表的兼容性查询器，适合在不构造完整引擎时做预校验：
 
 ```typescript
-import { CompatibilityEngine } from "@polyglot/core";
+import { CompatibilityEngine } from "@polyglot-img/core";
 
 const compat = new CompatibilityEngine();
 compat.register({ front: "png", back: "zip", supported: true, mode: "relocated" });
@@ -127,7 +127,7 @@ import {
   validateArchiveLimits, // 按限额校验 entries，越界抛错
   sanitizeEntryPath, // 拒绝 '..' 与绝对路径，统一分隔符为 '/'
   type ArchiveSecurityLimits,
-} from "@polyglot/core";
+} from "@polyglot-img/core";
 
 sanitizeEntryPath("a/b.txt"); // 'a/b.txt'
 sanitizeEntryPath("../../etc/passwd"); // throws
@@ -147,7 +147,7 @@ validateArchiveLimits(entries, DEFAULT_SECURITY_LIMITS);
 | `RelocationError`         | 偏移重定位失败                            |
 
 ```typescript
-import { PolyglotError, UnsupportedFormatError } from "@polyglot/core";
+import { PolyglotError, UnsupportedFormatError } from "@polyglot-img/core";
 
 try {
   await engine.create({ front: "./x.webp", back: { format: "zip", entries: [] } });
@@ -164,7 +164,7 @@ try {
 ## 开发
 
 ```bash
-npm run build -w @polyglot/core
-npm run typecheck -w @polyglot/core
+npm run build -w @polyglot-img/core
+npm run typecheck -w @polyglot-img/core
 npm test    # 覆盖 tests/compatibility/、tests/detector/、tests/integration/
 ```

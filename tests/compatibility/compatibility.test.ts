@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { CompatibilityEngine } from "@polyglot/core";
+import { CompatibilityEngine } from "@polyglot-img/core";
 
 describe("CompatibilityEngine", () => {
   it("should return undefined for unknown pair", () => {

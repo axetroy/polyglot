@@ -1,7 +1,7 @@
 /**
  * Pure-ESM byte utilities — no Node.js Buffer dependency.
  *
- * Every function accepts or returns plain Uint8Array so the @polyglot packages
+ * Every function accepts or returns plain Uint8Array so the @polyglot-img packages
  * can run in any ESM-compliant runtime (Deno, Bun, browser, edge workers…).
  *
  * Buffer from Node.js is a Uint8Array subclass, so existing callers that pass

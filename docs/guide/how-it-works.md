@@ -113,7 +113,7 @@ prefix = EOCD绝对位置 - 中央目录大小 - 中央目录偏移
 
 ## 浏览器端实现
 
-`@polyglot/browser` 是同一套算法的纯 `Uint8Array` 移植，不依赖 Node 的 `Buffer`：
+`@polyglot-img/browser` 是同一套算法的纯 `Uint8Array` 移植，不依赖 Node 的 `Buffer`：
 
 - CRC-32 查表实现在模块加载时构建一次
 - PNG / JPEG 解析直接操作 `Uint8Array` 与 `DataView`

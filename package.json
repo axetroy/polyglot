@@ -14,7 +14,7 @@
     "packages/formats/*"
   ],
   "scripts": {
-    "build": "npm run build -w @polyglot/binary -w @polyglot/formats-png -w @polyglot/formats-jpeg -w @polyglot/formats-zip -w @polyglot/core -w @polyglot/sdk -w @polyglot/cli -w @polyglot/browser",
+    "build": "npm run build -w @polyglot-img/binary -w @polyglot-img/formats-png -w @polyglot-img/formats-jpeg -w @polyglot-img/formats-zip -w @polyglot-img/core -w @polyglot-img/sdk -w @polyglot-img/cli -w @polyglot-img/browser",
     "build:watch": "npm run build -- --watch",
     "dev": "npm run test:watch",
     "docs:dev": "vitepress dev docs",
@@ -36,7 +36,7 @@
     "prepublishOnly": "npm run typecheck && npm run lint && npm run test:coverage",
     "changeset": "changeset",
     "version": "changeset version && npm run build && git add -A && git commit -m \"chore: version bump\" --no-verify || true",
-    "release": "changeset version && npm run build && npm publish -w @polyglot/sdk -w @polyglot/cli -w @polyglot/browser --provenance --access public && git push origin main --follow-tags",
+    "release": "changeset version && npm run build && npm publish -w @polyglot-img/sdk -w @polyglot-img/cli -w @polyglot-img/browser --provenance --access public && git push origin main --follow-tags",
     "version:bump": "changeset version && npm run build && git add -A && git commit -m \"chore: version bump\""
   },
   "devDependencies": {

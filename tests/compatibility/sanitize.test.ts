@@ -4,7 +4,7 @@ import {
   sanitizeEntryPath,
   validateArchiveLimits,
   DEFAULT_SECURITY_LIMITS,
-} from "@polyglot/core";
+} from "@polyglot-img/core";
 
 describe("sanitizeEntryPath", () => {
   it("accepts normal relative path", () => {

@@ -1,17 +1,17 @@
 # Release Guide
 
-This document explains how to publish `@polyglot/*` packages to npm. The entire flow is CI-driven — developers only need to create a PR.
+This document explains how to publish `@polyglot-img/*` packages to npm. The entire flow is CI-driven — developers only need to create a PR.
 
 ## Publishable packages
 
-| Package               | Published? | Description              |
-| --------------------- | ---------- | ------------------------ |
-| `@polyglot/sdk`       | ✅         | Main SDK                 |
-| `@polyglot/cli`       | ✅         | CLI tool                 |
-| `@polyglot/browser`   | ✅         | Browser bundle           |
-| `@polyglot/binary`    | ❌         | Internal utility         |
-| `@polyglot/core`      | ❌         | Internal engine          |
-| `@polyglot/formats-*` | ❌         | Internal format adapters |
+| Package                   | Published? | Description              |
+| ------------------------- | ---------- | ------------------------ |
+| `@polyglot-img/sdk`       | ✅         | Main SDK                 |
+| `@polyglot-img/cli`       | ✅         | CLI tool                 |
+| `@polyglot-img/browser`   | ✅         | Browser bundle           |
+| `@polyglot-img/binary`    | ❌         | Internal utility         |
+| `@polyglot-img/core`      | ❌         | Internal engine          |
+| `@polyglot-img/formats-*` | ❌         | Internal format adapters |
 
 Only 3 user-facing packages are published; the rest are internal dependencies managed alongside the SDK version.
 
@@ -54,7 +54,7 @@ npx changeset
 
 The interactive wizard asks:
 
-- **Which packages changed?** (space to select `@polyglot/sdk`, `@polyglot/cli`, `@polyglot/browser`)
+- **Which packages changed?** (space to select `@polyglot-img/sdk`, `@polyglot-img/cli`, `@polyglot-img/browser`)
 - **What kind of change?** (`patch` fix / `minor` feature / `major` breaking change)
 - **Changelog description**
 
@@ -80,7 +80,7 @@ Check the GitHub Actions page to confirm the workflow completed successfully.
 Merge the Changeset-created version bump PR into `main`. This triggers publication:
 
 1. CI builds all packages
-2. Publishes `@polyglot/sdk`, `@polyglot/cli`, `@polyglot/browser` to npm (with provenance signing)
+2. Publishes `@polyglot-img/sdk`, `@polyglot-img/cli`, `@polyglot-img/browser` to npm (with provenance signing)
 3. Creates a Git tag `vX.Y.Z`
 
 **No manual intervention required.**
@@ -89,10 +89,10 @@ Merge the Changeset-created version bump PR into `main`. This triggers publicati
 
 ```bash
 # View version history
-npm view @polyglot/sdk versions
+npm view @polyglot-img/sdk versions
 
 # Confirm latest tag
-npm view @polyglot/sdk dist-tags
+npm view @polyglot-img/sdk dist-tags
 
 # Check CI run
 gh run list --limit 3
@@ -139,6 +139,6 @@ Add packages to the `ignore` list in `.changeset/config.json`:
 
 ```json
 {
-  "ignore": ["@polyglot/cli"]
+  "ignore": ["@polyglot-img/cli"]
 }
 ```

@@ -1,11 +1,11 @@
-# @polyglot/formats-zip
+# @polyglot-img/formats-zip
 
 ZIP 后端格式适配器 — 解析、构建、偏移重定位，以及安全校验。
 
 ## 安装
 
 ```json
-{ "dependencies": { "@polyglot/formats-zip": "*" } }
+{ "dependencies": { "@polyglot-img/formats-zip": "*" } }
 ```
 
 ## 导出
@@ -23,7 +23,7 @@ import {
   type ZipParseOptions,
   type ZipEntryData,
   type ZipBuildOptions,
-} from "@polyglot/formats-zip";
+} from "@polyglot-img/formats-zip";
 ```
 
 ## 安全限制（默认开启）
@@ -43,7 +43,7 @@ interface ZipParseOptions {
 
 ## `ZipAdapter`
 
-实现 `@polyglot/binary.BackAdapter`，`id` 为 `'zip'`。
+实现 `@polyglot-img/binary.BackAdapter`，`id` 为 `'zip'`。
 
 ```typescript
 interface BackAdapter {
@@ -129,7 +129,7 @@ interface ZipEntry {
 ## 开发
 
 ```bash
-npm run build -w @polyglot/formats-zip
-npm run typecheck -w @polyglot/formats-zip
+npm run build -w @polyglot-img/formats-zip
+npm run typecheck -w @polyglot-img/formats-zip
 npm test
 ```

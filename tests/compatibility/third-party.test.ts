@@ -4,9 +4,9 @@ import { tmpdir } from "os";
 import { join } from "path";
 import { spawnSync } from "child_process";
 import { deflateSync } from "zlib";
-import { PolyglotEngine } from "@polyglot/core";
-import { pngAdapter } from "@polyglot/formats-png";
-import { zipAdapter } from "@polyglot/formats-zip";
+import { PolyglotEngine } from "@polyglot-img/core";
+import { pngAdapter } from "@polyglot-img/formats-png";
+import { zipAdapter } from "@polyglot-img/formats-zip";
 
 /**
  * Third-party compatibility tests — the actual product claim.

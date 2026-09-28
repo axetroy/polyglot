@@ -1,5 +1,5 @@
-import type { BackAdapter, BinarySource } from "@polyglot/binary";
-import { BufferSource, PathSource } from "@polyglot/binary";
+import type { BackAdapter, BinarySource } from "@polyglot-img/binary";
+import { BufferSource, PathSource } from "@polyglot-img/binary";
 import { parseZip, type ZipArchive } from "./parser.js";
 import { buildZip, relocateZipOffsets, type ZipEntryData } from "./writer.js";
 

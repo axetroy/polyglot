@@ -6,14 +6,14 @@ This project uses [Changesets](https://github.com/changesets/changesets) for ver
 
 ## Packages
 
-| Package               | Published? | Scope                    |
-| --------------------- | ---------- | ------------------------ |
-| `@polyglot/sdk`       | ✅ public  | Main SDK                 |
-| `@polyglot/cli`       | ✅ public  | CLI tool                 |
-| `@polyglot/browser`   | ✅ public  | Browser bundle           |
-| `@polyglot/binary`    | ❌ private | Internal utility         |
-| `@polyglot/core`      | ❌ private | Internal engine          |
-| `@polyglot/formats-*` | ❌ private | Internal format adapters |
+| Package                   | Published? | Scope                    |
+| ------------------------- | ---------- | ------------------------ |
+| `@polyglot-img/sdk`       | ✅ public  | Main SDK                 |
+| `@polyglot-img/cli`       | ✅ public  | CLI tool                 |
+| `@polyglot-img/browser`   | ✅ public  | Browser bundle           |
+| `@polyglot-img/binary`    | ❌ private | Internal utility         |
+| `@polyglot-img/core`      | ❌ private | Internal engine          |
+| `@polyglot-img/formats-*` | ❌ private | Internal format adapters |
 
 ## First-time setup (one-time, requires human)
 
@@ -65,7 +65,7 @@ Open a PR with the changeset, get it reviewed and merged. The CI runs full tests
 When the version-bump commit lands on `main`, the **Release** workflow triggers:
 
 1. Builds all packages
-2. Publishes `@polyglot/sdk`, `@polyglot/cli`, `@polyglot/browser` to npm with `--provenance`
+2. Publishes `@polyglot-img/sdk`, `@polyglot-img/cli`, `@polyglot-img/browser` to npm with `--provenance`
 3. Creates a git tag `vX.Y.Z`
 
 No manual intervention needed.
@@ -75,8 +75,8 @@ No manual intervention needed.
 After publish, verify:
 
 ```bash
-npm view @polyglot/sdk versions        # should show the new version
-npm view @polyglot/sdk dist-tags       # should show "latest"
+npm view @polyglot-img/sdk versions        # should show the new version
+npm view @polyglot-img/sdk dist-tags       # should show "latest"
 gh run view $(gh run list --limit 1 --json databaseId --jq '.[0].databaseId')  # check CI
 ```
 
