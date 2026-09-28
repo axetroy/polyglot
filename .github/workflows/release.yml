@@ -34,15 +34,14 @@ jobs:
 
       - run: npm ci --ignore-scripts
 
-      - uses: changesets/action@v1
+      - uses: changesets/action@v2
         with:
-          title: "chore: version bump"
-          commit: "chore: version bump"
-          version: npm run version
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          pr-title: "chore: version bump"
+          commit-message: "chore: version bump"
+          version-script: npm run version
           # Do NOT publish here — the publish job below handles that.
-          publish: ""
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          publish-script: ""
 
   # Job 2: publish to npm when a version-bump commit lands on main.
   # Skipped when no version bump was detected (normal feature PR merges).
