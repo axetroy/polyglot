@@ -1,5 +1,11 @@
 # @polyglot-img/browser
 
+## 0.1.3
+
+### Patch Changes
+
+- [`8b5b168`](https://github.com/axetroy/polyglot/commit/8b5b16806cd8fafe1f9381f2b028e3d72ce89a6e) Thanks [@axetroy](https://github.com/axetroy)! - release
+
 ## 0.1.2
 
 ### Patch Changes
