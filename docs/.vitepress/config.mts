@@ -23,6 +23,7 @@ export default defineConfig({
 
   head: [
     ["meta", { name: "theme-color", content: "#6c5ce7" }],
+    ["link", { rel: "icon", type: "image/svg+xml", href: "/logo.svg" }],
     ["meta", { property: "og:type", content: "website" }],
     [
       "script",
@@ -30,6 +31,10 @@ export default defineConfig({
       `(()=>{var l=location.href,n=navigator.language;if(!/^https?:\\/\\/[^/]+\\/polyglot\\/(en\\/?|$)/.test(n)&&!/^https?:\\/\\/[^/]+\\/polyglot\\/(en\\/?|[a-z]{2}-[A-Z]{2}\\/?)/i.test(n)){var u=new URL(n),p=u.pathname.replace(/\\/polyglot\\/?$/,'')||'/';u.pathname='/polyglot/en'+(p==='/p'?'':p);if(u.href!==n){n=u.href;try{history.replaceState(null,'',n)}catch(e){}location.replace(n)}}})()`,
     ],
   ],
+
+  themeConfig: {
+    logo: "/logo.svg",
+  },
 
   locales: {
     root: {

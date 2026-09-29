@@ -1,3 +1,7 @@
+<p align="center">
+  <img src="./docs/public/logo.svg" alt="Polyglot File Engine" width="160" height="160" />
+</p>
+
 # Polyglot File Engine
 
 **A local dual-format file engine** — merges an image and a ZIP archive into a single file that both kinds of parsers can still read.

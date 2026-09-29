@@ -5,6 +5,9 @@ hero:
   name: Polyglot
   text: One file, two formats
   tagline: Embed a ZIP archive inside a PNG or JPEG — image viewers show the picture, archive tools read the payload.
+  image:
+    src: /logo.svg
+    alt: Polyglot
   actions:
     - theme: brand
       text: Getting Started

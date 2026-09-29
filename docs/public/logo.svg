@@ -1,0 +1,92 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 400" width="400" height="400">
+  <defs>
+    <linearGradient id="bgGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#ffffff"/>
+      <stop offset="100%" style="stop-color:#eef2ff"/>
+    </linearGradient>
+    <linearGradient id="imgGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#0ea5e9"/>
+      <stop offset="100%" style="stop-color:#22d3ee"/>
+    </linearGradient>
+    <linearGradient id="zipGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#8b5cf6"/>
+      <stop offset="100%" style="stop-color:#ec4899"/>
+    </linearGradient>
+    <linearGradient id="imgSide" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" style="stop-color:#0ea5e9"/>
+      <stop offset="100%" style="stop-color:#0369a1"/>
+    </linearGradient>
+    <linearGradient id="zipSide" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" style="stop-color:#8b5cf6"/>
+      <stop offset="100%" style="stop-color:#6d28d9"/>
+    </linearGradient>
+    <filter id="softGlow">
+      <feGaussianBlur stdDeviation="1.5" result="blur"/>
+      <feMerge>
+        <feMergeNode in="blur"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+    <filter id="layerShadow">
+      <feDropShadow dx="0" dy="6" stdDeviation="5" flood-color="#4338ca" flood-opacity="0.2"/>
+    </filter>
+  </defs>
+
+  <!-- 亮色背景圆角方形 -->
+  <rect x="30" y="30" width="340" height="340" rx="80" ry="80" fill="url(#bgGrad)"/>
+  <rect x="30" y="30" width="340" height="340" rx="80" ry="80" fill="none" stroke="#c7d2fe" stroke-width="1.5"/>
+
+  <!-- ===== 统一 60° 等轴测视角 ===== -->
+  <g transform="translate(200, 200) scale(1, 0.6) translate(-200, -200)">
+
+    <!-- 整个堆叠组整体居中 -->
+    <g transform="translate(0, -50)">
+
+      <!-- ===== 底层：ZIP 压缩包（带厚度） ===== -->
+      <g transform="translate(0, 10) rotate(12, 200, 240)">
+        <!-- 厚度侧面（下方） -->
+        <rect x="115" y="248" width="170" height="14" rx="6" ry="6" fill="url(#zipSide)" opacity="0.9"/>
+        <!-- 厚度侧面（左侧立体感） -->
+        <path d="M115 248 L115 240 L115 240 L115 248 Z" fill="url(#zipSide)" opacity="0.9"/>
+
+        <!-- 顶面 -->
+        <rect x="115" y="240" width="170" height="105" rx="13" ry="13" fill="#ffffff" stroke="url(#zipGrad)" stroke-width="3" opacity="0.98"/>
+
+        <!-- 拉链齿 -->
+        <line x1="200" y1="240" x2="200" y2="345" stroke="url(#zipGrad)" stroke-width="2.5" opacity="0.85"/>
+
+        <!-- 拉链头 -->
+        <rect x="194" y="280" width="12" height="18" rx="3" ry="3" fill="none" stroke="#8b5cf6" stroke-width="2" filter="url(#softGlow)"/>
+        <circle cx="200" cy="289" r="2.5" fill="#8b5cf6"/>
+
+        <!-- ZIP 标签 -->
+        <text x="200" y="327" font-family="'Segoe UI', Arial, sans-serif" font-size="18" fill="#8b5cf6" text-anchor="middle" font-weight="700" opacity="0.85">ZIP</text>
+      </g>
+
+      <!-- ===== 顶层：图片文件（PNG/JPEG，带厚度） ===== -->
+      <g transform="translate(0, 0) rotate(12, 200, 180)" filter="url(#layerShadow)">
+        <!-- 厚度侧面（下方） -->
+        <rect x="115" y="188" width="170" height="14" rx="6" ry="6" fill="url(#imgSide)" opacity="0.9"/>
+        <!-- 厚度侧面（左侧） -->
+        <path d="M115 188 L115 180 L115 180 L115 188 Z" fill="url(#imgSide)" opacity="0.9"/>
+
+        <!-- 顶面 -->
+        <rect x="115" y="180" width="170" height="105" rx="13" ry="13" fill="#ffffff" stroke="url(#imgGrad)" stroke-width="3" opacity="0.98"/>
+
+        <!-- 图片内容 - 太阳 -->
+        <circle cx="152" cy="225" r="10" fill="none" stroke="url(#imgGrad)" stroke-width="2.2" opacity="0.9" filter="url(#softGlow)"/>
+
+        <!-- 图片内容 - 山 -->
+        <path d="M130 275 L170 227 L200 255 L222 230 L270 275 Z" fill="none" stroke="url(#imgGrad)" stroke-width="2.6" stroke-linejoin="round" opacity="0.9" filter="url(#softGlow)"/>
+
+        <!-- 图片标签 -->
+        <text x="200" y="198" font-family="'Segoe UI', Arial, sans-serif" font-size="12" fill="#0ea5e9" text-anchor="middle" font-weight="700" opacity="0.7">PNG / JPEG</text>
+      </g>
+
+    </g>
+  </g>
+
+  <!-- 微光装饰 -->
+  <circle cx="200" cy="200" r="148" fill="none" stroke="#a78bfa" stroke-width="0.8" opacity="0.12"/>
+  <circle cx="200" cy="200" r="162" fill="none" stroke="#22d3ee" stroke-width="0.5" opacity="0.06"/>
+</svg>

@@ -5,6 +5,9 @@ hero:
   name: Polyglot
   text: 一个文件，两种格式
   tagline: 将 PNG / JPEG 图片与 ZIP 压缩包合成为单个文件 —— 图片查看器显示图片，解压工具读取归档。
+  image:
+    src: /logo.svg
+    alt: Polyglot
   actions:
     - theme: brand
       text: 快速开始
