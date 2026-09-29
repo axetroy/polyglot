@@ -25,14 +25,18 @@ npm login --registry=https://registry.npmjs.org
 
 Must be run interactively (with a TTY). This writes your auth token to `~/.npmrc`.
 
-### 2. Configure GitHub Secret
+### 2. Configure Trusted Publisher on npmjs.com
 
-Copy the `_authToken` value from `~/.npmrc` (without the `//registry.npmjs.org/:_authToken=` prefix) and add it to GitHub:
+The CI publishes with **npm Trusted Publishing (OIDC)** — no npm token or GitHub secret is used. For each of the three publishable packages, add this repo as a trusted publisher on npmjs.com:
 
-> **Settings → Secrets and variables → Actions → New repository secret**
+> **npmjs.com → package → Settings → Trusted Publisher → Add new**
 >
-> - Name: `NPM_TOKEN`
-> - Value: paste the token value
+> - Provider: `GitHub Actions`
+> - Organization/User: `axetroy`
+> - Repository: `polyglot`
+> - Workflow filename: `release.yml`
+
+All fields are case-sensitive and must match exactly (including the `.yml` extension).
 
 ### 3. Verify configuration
 
@@ -100,7 +104,7 @@ gh run list --limit 3
 
 ## About Provenance
 
-The `--provenance` flag generates a sigstore attestation that binds the npm package to the GitHub Actions run. No extra configuration is needed — the GitHub Actions runner provides an OIDC token automatically, and the npm CLI reads it.
+The `--provenance` flag generates a sigstore attestation that binds the npm package to the GitHub Actions run. The CI authenticates via npm Trusted Publishing (OIDC): the GitHub Actions runner provides an OIDC token automatically (the workflow needs `permissions: id-token: write`), and the npm CLI reads it — no extra secrets required. Prerequisite: each package must have a Trusted Publisher configured on npmjs.com (see above).
 
 On the npm package page you'll see a "Provenance" badge that verifies the build source.
 

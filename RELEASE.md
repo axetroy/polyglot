@@ -25,18 +25,22 @@ npm login --registry=https://registry.npmjs.org
 
 This must be run **interactively** (with a TTY). It establishes your npm account trust and stores a token in `~/.npmrc`.
 
-### 2. Create GitHub secret
+### 2. Configure Trusted Publishing on npmjs.com
 
-Copy the token from `~/.npmrc` (`//registry.npmjs.org/:_authToken=...`) and add it to GitHub:
+The CI publishes with **npm Trusted Publishing (OIDC)** — no npm token or GitHub secret is used. For each of the three publishable packages, add this repo as a trusted publisher on npmjs.com:
 
-> **Repository Settings → Secrets and variables → Actions → New repository secret**
+> **npmjs.com → package → Settings → Trusted Publisher → Add new**
 >
-> - Name: `NPM_TOKEN`
-> - Value: the `_authToken` value (without the `//registry.npmjs.org/:_authToken=` prefix)
+> - Provider: `GitHub Actions`
+> - Organization/User: `axetroy`
+> - Repository: `polyglot`
+> - Workflow filename: `release.yml`
 
-### 3. No other env vars needed
+All fields are case-sensitive and must match exactly (including the `.yml` extension).
 
-The `--provenance` flag works out of the box in GitHub Actions: npm reads the OIDC token automatically from the runner environment. No extra secrets or configuration required.
+### 3. No secrets needed
+
+`npm publish --provenance` reads the GitHub Actions OIDC token automatically — the workflow only needs `permissions: id-token: write`, which is already set in `.github/workflows/release.yml`. No `NPM_TOKEN` secret or any other env vars are required.
 
 ## Releasing a new version
 
@@ -86,9 +90,9 @@ gh run view $(gh run list --limit 1 --json databaseId --jq '.[0].databaseId')  #
 
 Your npm account hasn't been set up for provenance yet. Run `npm login` on a local machine with a TTY. The first successful publish from a new account enables provenance.
 
-### `npm ERR! Missing: NPM_TOKEN`
+### `npm ERR! ENEEDAUTH: Unable to authenticate`
 
-The `NPM_TOKEN` GitHub secret is not set or has expired. Regenerate a fine-grained PAT on npmjs.com with `Publish` scope and update the secret.
+Publishing uses npm Trusted Publishing (OIDC), so there is no token to fix. Check that the trusted publisher is configured for each package on npmjs.com with the exact workflow filename `release.yml` (including the `.yml` extension — all fields are case-sensitive), and that the workflow has `id-token: write` permission.
 
 ### Changeset PR not created
 

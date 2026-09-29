@@ -45,10 +45,15 @@ jobs:
 
   # Job 2: publish to npm when a version-bump commit lands on main.
   # Skipped when no version bump was detected (normal feature PR merges).
+  #
+  # IMPORTANT: this job must NOT `need` the version job. The two jobs are
+  # mutually exclusive via their `if` conditions: on a version-bump commit the
+  # version job is skipped (its `if` is false) — and a job that `needs` a
+  # skipped job is itself skipped, so `needs: [version]` would silently skip
+  # publishing exactly when it should run.
   publish:
     name: Publish to npm
     runs-on: ubuntu-latest
-    needs: [version]
     # Only run when the workflow was triggered by a version-bump commit.
     if: >-
       contains(github.event.head_commit.message, 'chore: version bump')
@@ -69,21 +74,45 @@ jobs:
       - run: npm ci --ignore-scripts
       - run: npm run build
 
-      # Publish public packages with provenance.
-      # --provenance: auto-generates sigstore attestation from GitHub Actions
-      #               OIDC context — no extra env vars required.
-      # NPM_TOKEN: set once by repo owner via `npm login`; stored as GitHub secret.
+      # Publish via npm Trusted Publishing (OIDC) — no NPM_TOKEN secret needed.
+      # npm CLI (>= 11.5.1, bundled with Node 24) detects the GitHub Actions
+      # OIDC token (enabled by `id-token: write` above) and authenticates to
+      # npm automatically. On npmjs.com, each package must list this workflow
+      # as a trusted publisher:
+      #   Provider: GitHub Actions · Organization: axetroy · Repository: polyglot
+      #   Workflow filename: release.yml
+      # --provenance: attaches a sigstore attestation binding the publish to
+      #   this workflow's OIDC identity. Requires the package.json `repository`
+      #   field to match axetroy/polyglot (added in each publishable package).
+      # Publish each package only when its version differs from the latest on
+      # npm (independent bumps via changesets are possible, and re-publishing an
+      # unchanged version fails with 403 EPUBLISHCONFLICT).
       - run: |
-          npm publish -w @polyglot-img/sdk     --provenance --access public
-          npm publish -w @polyglot-img/cli     --provenance --access public
-          npm publish -w @polyglot-img/browser --provenance --access public
-        env:
-          NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
+          set -e
+          for pkg in sdk cli browser; do
+            VER=$(node -p "require('./packages/$pkg/package.json').version")
+            LATEST=$(npm view "@polyglot-img/$pkg" version 2>/dev/null || echo "none")
+            if [ "$VER" != "$LATEST" ]; then
+              npm publish -w "@polyglot-img/$pkg" --provenance --access public
+            else
+              echo "skip @polyglot-img/$pkg (version $VER already published)"
+            fi
+          done
 
       - name: Create Git tag
+        # checkout ran with persist-credentials: false, so `git push origin`
+        # has no stored credentials; push with an explicit token URL instead.
+        # Skip if the tag already exists (e.g. unchanged sdk on an independent
+        # bump of another package).
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           SDK_VERSION=$(node -p "require('./packages/sdk/package.json').version")
-          git config user.name "github-actions[bot]"
-          git config user.email "github-actions[bot]@users.noreply.github.com"
-          git tag -a "v${SDK_VERSION}" -m "Release v${SDK_VERSION}"
-          git push origin "v${SDK_VERSION}"
+          if git rev-parse "v${SDK_VERSION}" >/dev/null 2>&1; then
+            echo "tag v${SDK_VERSION} already exists, skipping"
+          else
+            git config user.name "github-actions[bot]"
+            git config user.email "github-actions[bot]@users.noreply.github.com"
+            git tag -a "v${SDK_VERSION}" -m "Release v${SDK_VERSION}"
+            git push "https://x-access-token:${GITHUB_TOKEN}@github.com/${GITHUB_REPOSITORY}.git" "v${SDK_VERSION}"
+          fi

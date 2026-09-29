@@ -4,6 +4,11 @@
   "type": "module",
   "main": "./dist/index.js",
   "types": "./dist/index.d.ts",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/axetroy/polyglot.git",
+    "directory": "packages/browser"
+  },
   "scripts": {
     "build": "tsup src/index.ts --format esm --dts --outDir dist --tsconfig tsconfig.json",
     "typecheck": "tsc --noEmit",

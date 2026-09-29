@@ -5,6 +5,11 @@
   "bin": {
     "polyglot": "./dist/index.js"
   },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/axetroy/polyglot.git",
+    "directory": "packages/cli"
+  },
   "scripts": {
     "build": "tsup src/index.ts --format esm --dts --outDir dist --tsconfig tsconfig.json",
     "typecheck": "tsc --noEmit",

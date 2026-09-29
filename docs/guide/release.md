@@ -25,14 +25,18 @@ npm login --registry=https://registry.npmjs.org
 
 必须在有 TTY 的终端中交互式运行。这会在 `~/.npmrc` 中写入你的认证 token。
 
-### 2. 配置 GitHub Secret
+### 2. 在 npmjs.com 配置 Trusted Publisher
 
-从 `~/.npmrc` 复制 `_authToken` 的值（不含前缀 `//registry.npmjs.org/:_authToken=`），添加到 GitHub：
+CI 通过 **npm Trusted Publishing（OIDC）** 发布——不使用 npm token，也不需要任何 GitHub Secret。需要为 3 个可发布的包分别在 npmjs.com 上配置可信发布者：
 
-> **Settings → Secrets and variables → Actions → New repository secret**
+> **npmjs.com → 包 → Settings → Trusted Publisher → Add new**
 >
-> - Name: `NPM_TOKEN`
-> - Value: 粘贴 token 值
+> - Provider: `GitHub Actions`
+> - Organization/User: `axetroy`
+> - Repository: `polyglot`
+> - Workflow filename: `release.yml`
+
+所有字段区分大小写，必须与仓库完全一致（包括 `.yml` 扩展名）。
 
 ### 3. 确认配置正确
 
@@ -100,7 +104,7 @@ gh run list --limit 3
 
 ## Provenance 说明
 
-发布时使用的 `--provenance` 标志会生成 sigstore 证明，将 npm 包与 GitHub Actions 运行绑定。这不需要额外配置 — GitHub Actions runner 自动提供 OIDC token，npm CLI 自动读取。
+发布时使用的 `--provenance` 标志会生成 sigstore 证明，将 npm 包与 GitHub Actions 运行绑定。CI 使用 npm Trusted Publishing（OIDC）认证：GitHub Actions runner 自动提供 OIDC token（工作流需声明 `permissions: id-token: write`），npm CLI 自动读取，无需任何额外 secret。前提是各包已在 npmjs.com 配置 Trusted Publisher（见上文）。
 
 在 npm 包页面可以看到 "Provenance" 徽章，点击可验证构建来源。
 
