@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="./docs/public/logo.svg" alt="Polyglot File Engine" width="160" height="160" />
+  <img src="./docs/public/logo-banner.svg" alt="Polyglot File Engine" width="100%" height="160" />
 </p>
 
 # Polyglot File Engine
